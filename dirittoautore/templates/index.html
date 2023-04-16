@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+<style> 
+ body {
+			padding-top:3%;			
+            font-family: Arial, sans-serif;
+            background-color: #F0F8FF;
+			margin: 0px;
+
+        }
+
+		h2 {
+			padding-left: 0.5%;
+            color: #556B2F;
+        }
+        p {
+			padding-left: 0.5%;
+            color: #696969;
+        }
+        button {
+            background-color: #556B2F;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #6B8E23;
+        }
+
+
+.sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+ background-color: #9cd1ff;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 30px;
+
+}
+.sidenav.exp{
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    width : 250px;
+}
+.menuelement{
+    padding-left: 20px;
+}
+
+
+.menu {
+    margin-left: 0px;
+    transition: 0.5s;
+}
+
+.menuexp{
+
+margin-left: 250px;
+}
+
+.card{
+  margin-left: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  width: 50%;
+  box-sizing: border-box;
+  padding: 1%;
+
+}
+.card.t {
+
+  background-color: beige;
+
+}
+
+.card.l{
+  background-color: #bcf648f0;
+}
+
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+
+.right{
+  float: right;
+}
+
+.form-container {
+  margin-top: 0px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+    background-color: lightgrey ;
+}
+
+.form-container.expanded {
+
+  max-height: 500px;
+}
+
+.bar{
+	top:0%;
+	height: 7%;
+	width: 100%;
+	position: fixed;
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+   overflow: hidden;
+   margin:0px;
+  background-color: #c5e1f9;
+}
+
+.search {
+  width: 80%;
+  display: flex;
+}
+
+.searchTerm {
+  width: 100%;
+  border-right: none;
+  border: 3px solid #556B2F;
+  padding: 5px;
+ margin-top: 5px;
+ margin-left: 5px;
+  height: 20px;
+  border-radius: 5px 0 0 5px;
+  color: #9DBFAF;
+}
+.searchButton {
+  width: 40px;
+  height: 36px;
+  margin-top: 5px;
+  text-align: center;
+  background-color: #556B2F;
+  border: 1px solid #556B2F;
+  border-radius: 0 5px 5px 0;
+  border-left: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+}
+</style>
+
+
+<head>
+	<title>Diritto d'autore decentralizzato</title>
+</head>
+
+
+<body onload = "connetti()"></body>
+
+<!-- menu -->
+<div id="menu" class = "menu">
+	
+    <div class = "bar">  
+		
+        <div class="search">
+            <span style="font-size:30px;cursor:pointer;color:#6B8E23" onclick="openNav()">&#9776;</span>
+           <input type="text" id ="ricerca" class="searchTerm" placeholder="Ricerca per titolo o per autore">
+           <button onclick="search()" class="searchButton"> <i class="fa fa-search"></i></button>
+          </button>
+        </div>
+
+    </div>
+
+<!-- barra laterale   -->
+
+<div id="sidenav" class="sidenav">
+	
+<div class="menuelement">
+<p>Deposita un Testo:</p>
+
+
+    <label for="ftitolo">titolo:</label>
+    <input type="text" id="ftitolo" name="ftitolo" value="..."><br><br>
+    <form method="POST" class="post-form" id = "post-form" enctype="multipart/form-data">  
+        {% csrf_token %}  
+        {{ form.as_p }}  
+    </form><br> <br>
+    <button id="btn_connect"  onclick = "deposita()">deposita </button> <br> <br>
+
+	<button id = "mode" onclick="selectmode()" >visualizza le tue licenze</button> <br><br>
+
+	<p>Banna un utente dall'acquistare le licenze per i tuoi testi:</p>
+	<input type="text" id="banuser" name="ftitolo" value="..."><br><br>
+	<button id = "mode" onclick="ban()" >banna</button> <br><br><br>
+
+	<p>Sblocca un utente:</p>
+	<input type="text" id="unbanuser" name="ftitolo" value="..."><br><br>
+	<button id = "mode" onclick="unban()" >sblocca</button> <br><br>
+
+	<div class = "right"><button id = "mode" onclick="logout()" >logout</button> </div>
+</div>
+</div>
+
+
+     <h2>Diritto d'autore decentralizzato</h2>
+     <p>Deposita il tuo testo o la tua opera originale.
+        Acquista licenze di riproduzione o di distribuzione 
+        per testi di altri autori.
+    </p>
+
+    <p id="portafoglio" style = "font-weight:bold;">Portafoglio: non connesso</p><br>
+
+
+	<!--in questo campo vengono iniettate le schede testo o licenza-->
+	<p id = "elenco"></p>
+    </div>
+</body>
+
+<script>
+  
+
+
+
+	open_menu =false;
+    var _event;
+
+    var DepositoContract;
+    const Depositocontractaddress = "{{Testoaddress}}"
+	var Licenzacontract;
+	const Licenzacontractaddress = "{{LicenzaAddress}}"
+
+	var cambioRip;
+	var cambioDis;
+	var prezzoDep;
+
+	async function connetti(){
+       
+	   if(window.ethereum)
+	 {
+		window.web3 = new Web3(window.ethereum)
+
+	   await window.ethereum.request({ method: "eth_requestAccounts" })
+	  
+	  .then((accounts) => {
+		  const account = accounts[0]
+		  window.ethereum.accounts = accounts
+			 document.getElementById("portafoglio").innerHTML="portafoglio: "+account
+			 buildTestocontract()
+			 buildLicenzacontract()
+             listTesti()
+
+			  DepositoContract.getPastEvents("cambioprezzoDeposito",{
+              fromBlock: 0,
+              toBlock: 'latest'
+              },function(error, event){ 
+                prezzoDep = event[event.length-1].returnValues[0]
+  			  })
+
+			Licenzacontract.getPastEvents("changeCambioRip",{
+              fromBlock: 0,
+              toBlock: 'latest'
+              },function(error, event){ 
+                cambioRip = event[event.length-1].returnValues[0]
+  			  })
+
+			Licenzacontract.getPastEvents("changeCambioRip",{
+              fromBlock: 0,
+              toBlock: 'latest'
+              },function(error, event){ 
+                cambioDis = event[event.length-1].returnValues[0]
+  			  })
+
+
+				window.ethereum.on('accountsChanged', function (accounts) {
+					window.location.replace("http://127.0.0.1:8000/dirittocenet/logout");
+				})
+		
+	   }).catch((error) => {
+		  console.log(error, error.code);
+	   })
+	 }
+	 else{
+	   console.log("errore , metamask non abilitato")
+	 }
+	}
+
+  function logout(){
+	window.location.replace("http://127.0.0.1:8000/dirittocenet/logout");
+  }
+
+  function selectmode(){
+	//questa funzione  cambia dalla modalità visualizzazione licenza a quella visualizzazione testi depositati e viceversa
+
+	const but = document.getElementById("mode")
+	document.getElementById("elenco").innerHTML = ""
+	if(but.innerHTML == "visualizza le tue licenze")
+	{
+		but.innerHTML = "visualizza i testi depositati"
+		listLicenze()
+
+	}else{
+		but.innerHTML = "visualizza le tue licenze" 
+		listTesti()
+}
+}
+
+function openNav() {
+
+	//apre l barra di menu laterale
+      if (open_menu)
+      {
+        document.getElementById("sidenav").classList.remove('exp')
+      document.getElementById("menu").classList.remove("menuexp")
+      open_menu =!open_menu;
+      }else{
+        document.getElementById("sidenav").classList.add('exp')
+      document.getElementById("menu").classList.add("menuexp")
+      open_menu=!open_menu;
+      }
+    }
+
+  async function deposita(){
+		
+        const file = document.getElementById("id_file").files[0];
+        console.log(file);
+        var id ;
+
+        const reader = new FileReader();
+		 // viene calcolato hash md del file selezionato per definire l'id corretto
+          reader.onload = (event) => {
+          const binaryString = event.target.result;
+          const md5 = CryptoJS.MD5(CryptoJS.enc.Latin1.parse(binaryString)).toString(CryptoJS.enc.Hex);
+          id = md5 
+          console.log(id)
+            var titolo = document.getElementById("ftitolo").value
+			
+          const trans = DepositoContract.methods.mint(titolo , id).send({"value": window.web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt){
+			//una volta effettuata la transazione il file viene caricato sul backend
+			$("#post-form").submit()			
+          }).catch((error) => {
+		  console.log(error, error.code);
+	   })
+	   
+	 }
+	 await reader.readAsBinaryString(file);   
+    }
+     
+      async function mintLicenzaRiproduzione(id , causale, expire)
+      {
+          //calcolo del costo
+          expire = document.getElementById("Rdat"+id)
+          var today = new Date();
+          today.setHours(0,0,0)
+          start = Math.floor(today.getTime() / 1000)
+          var scadenza =Math.floor( new Date(expire.value).getTime()/1000)
+          console.log("start: "+ start)
+          console.log("expire: "+ scadenza)
+          var value = (scadenza - start) * cambioRip
+          console.log(value)
+          value = window.web3.utils.BN(value)
+          Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).send({"value":window.web3.utils.toWei(value, "wei")})
+		  .catch((error) => {
+		  console.log(error, error.code);
+	   })
+      }
+  
+      async function mintLicenzaDistribuzione(id,causale,num){
+          //calcolo del costo
+          console.log(id)
+          console.log(causale)
+      
+          value = (cambioDis*num) 
+          console.log(value)
+          Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).send({"value" : window.web3.utils.toWei(value.toString(), "wei") })
+		  .catch((error) => {
+		  console.log(error, error.code);
+	   })
+  
+      }
+
+
+async function ban(){
+	target= document.getElementById("banuser").value
+	DepositoContract.methods.ban(target).send()
+	.catch((error) => {
+		  console.log(error, error.code);
+	   })
+}
+
+async function unban(){
+	target= document.getElementById("unbanuser").value
+	DepositoContract.methods.unban(target).send()
+	.catch((error) => {
+		  console.log(error, error.code);
+	   })
+}
+
+
+async function search(){
+	const but = document.getElementById("mode")
+	const query = document.getElementById("ricerca").value
+	var xmlHttp = new XMLHttpRequest();
+	if(but.innerHTML == "visualizza le tue licenze")
+	{
+    xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=T", false ); 
+	}else{
+		xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=L", false );
+	}
+	xmlHttp.send( null );
+	console.log(xmlHttp.response)
+	document.getElementById("elenco").innerHTML = ""
+	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
+
+}
+
+
+async function listTesti() {
+
+	var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q=&t=T", false ); 
+    xmlHttp.send( null );
+	document.getElementById("elenco").innerHTML = ""
+	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
+	  }
+  
+async function listLicenze(){
+
+	var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q=&t=L", false ); 
+    xmlHttp.send( null );
+	document.getElementById("elenco").innerHTML = ""
+	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
+    }
+  
+function espandiRip(id){
+	//gli element di ciascuna card costituente il testo sono identificati tramite id composto da una nome che identifica
+	// l'element(bottone , label ,etc.) + id univoco del testo depositoato
+
+const idRip= "R"+id //bottone per la licenza di riproduzione
+const idDis = "D"+id //bottone per la licenza di distribuzione
+const idData = "Rdat"+id //input type data per la data di scadenza della licenza di riproduzione
+const idCau = "Rcau"+id //causale
+const idCos = "Rcos"+id //label che indica il costo stimato per l'acquisto della licenza
+
+const containerRip = document.getElementById(idRip)
+const containerDis = document.getElementById(idDis)
+const costo = document.getElementById(idCos)
+const dateInput =  document.getElementById(idData)
+
+if (containerDis.classList.contains('expanded')){ containerDis.classList.remove('expanded');}
+
+  if (!containerRip.classList.contains('expanded')) {
+    containerRip.classList.add('expanded');
+  } else {
+    containerRip.classList.remove('expanded');
+  }
+
+  dateInput.addEventListener('change',()=>{
+
+var today = new Date();
+today.setHours(0,0,0)
+start = today.getTime() / 1000
+console.log(start)
+var scadenza = new Date(dateInput.value).getTime()/1000
+var value = Math.floor(scadenza - start) * cambioRip
+
+if(value >0 ){costo.innerHTML= "costo : "+value +"WEI"}
+})
+
+}
+
+function espandidis(id){
+
+const idRip= "R"+id
+const idDis = "D"+id
+const idNum = "Dnum"+id //input type per il numero di copie autorizzato dalla licenza di distribuzione
+const idCau = "Dcau"+id
+const idCos = "Dcos"+id
+
+
+const containerRip = document.getElementById(idRip)
+const containerDis = document.getElementById(idDis)
+
+const costo = document.getElementById(idCos)
+const numberInput =  document.getElementById(idNum)
+
+
+if (containerRip.classList.contains('expanded')){ containerRip.classList.remove('expanded');}
+
+  if (!containerDis.classList.contains('expanded')) {
+    containerDis.classList.add('expanded');
+  } else {
+    containerDis.classList.remove('expanded');
+  }
+
+  numberInput.addEventListener('change', () => {
+    value = numberInput.value * cambioDis
+    if(value >0 ){costo.innerHTML= "costo : "+value +"WEI"}
+
+});
+
+}
+
+
+//seguono due metodi che vencono usati per costruire le istanze dei due contratti, tramite l'ABI del codice solidity , 
+//il contract address dei contratti e il portafoglio metamask interagente  (i.e. l'utente loggato)
+
+function buildTestocontract(){
+     DepositoContract = new window.web3.eth.Contract(
+		[
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "prezzo",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "token_id",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "titolo",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "data",
+				"type": "uint256"
+			}
+		],
+		"name": "Deposito",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "prezzo",
+				"type": "uint256"
+			}
+		],
+		"name": "cambioprezzoDeposito",
+		"type": "event"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "fallback"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			}
+		],
+		"name": "ban",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "id",
+				"type": "string"
+			}
+		],
+		"name": "idOfTesto",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "titolo",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "time",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "token_id",
+						"type": "string"
+					}
+				],
+				"internalType": "struct testo",
+				"name": "t",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "titolo",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "token_id",
+				"type": "string"
+			}
+		],
+		"name": "mint",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "token",
+				"type": "string"
+			}
+		],
+		"name": "onwnerOf",
+		"outputs": [
+			{
+				"internalType": "address payable",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "prezzo",
+				"type": "uint256"
+			}
+		],
+		"name": "setprezzoDeposito",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "testiOf",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "titolo",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "time",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "token_id",
+						"type": "string"
+					}
+				],
+				"internalType": "struct testo[]",
+				"name": "testi",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			}
+		],
+		"name": "unban",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "token_id",
+				"type": "string"
+			}
+		],
+		"name": "validDeposito",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "validity",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "author",
+				"type": "address"
+			}
+		],
+		"name": "validUser",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "valid",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
+	}
+],Depositocontractaddress,{from: window.ethereum.selectedAddress})
+    }
+
+function buildLicenzacontract()
+    {
+			 Licenzacontract = new window.web3.eth.Contract([
+	{
+		"inputs": [
+			{
+				"internalType": "address payable",
+				"name": "addTesti",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "cambioRip",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "cambioDis",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "tipo",
+				"type": "bool"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "proprietario",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "autore",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "testo",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "id_testo",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "time",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes20",
+				"name": "id",
+				"type": "bytes20"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "dati",
+				"type": "uint256"
+			}
+		],
+		"name": "RilascioLicenza",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "cambio",
+				"type": "uint256"
+			}
+		],
+		"name": "changeCambioDis",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "cambio",
+				"type": "uint256"
+			}
+		],
+		"name": "changeCambioRip",
+		"type": "event"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "fallback"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "token_id",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "causale",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "copie",
+				"type": "uint256"
+			}
+		],
+		"name": "mintLicenzaDistribuzione",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "token_id",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "causale",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "expire",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "start",
+				"type": "uint256"
+			}
+		],
+		"name": "mintLicenzaRiproduzione",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "copie",
+				"type": "uint256"
+			}
+		],
+		"name": "priceDistribuzione",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "prezzo",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "expire",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "start",
+				"type": "uint256"
+			}
+		],
+		"name": "priceRiproduzione",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "prezzo",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "target",
+				"type": "uint256"
+			}
+		],
+		"name": "setcambioDistribuzione",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "target",
+				"type": "uint256"
+			}
+		],
+		"name": "setcambioRiproduzione",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address payable",
+				"name": "_to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			}
+		],
+		"name": "transfer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"stateMutability": "payable",
+		"type": "receive"
+	}
+], Licenzacontractaddress,{from: window.ethereum.selectedAddress})
+    }
+
+    </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+    </html>

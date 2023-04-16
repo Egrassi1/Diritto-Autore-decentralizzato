@@ -1,0 +1,21 @@
+Market place NFT(immagini):
+-eseguire il mint di un NFT
+-Mettere il proprio NFT all'asta
+-Visualizzare gli NFT degli altri utenti (globalmente o cercando il singolo utente)
+-Acquistare NFT altrui tramite aste
+
+- L'asta parte da un prezzo base ed è a tempo , al terminare del tempo l'utente che ha fatto l'offerta maggiore diventa proprietario dell'NFT
+
+
+Progamma per le patenti:
+- Un utente basa può  acquistare un esame della patente ,
+  dopo aver risolto un breve quiz(a risposta multipla ad esempio) se si ha raggiunto il punteggio minimo, 
+  l'utente ottiene una patente sotto forma di token. Alla patente è associato il timestamp dell'emissione ed un numero di punti(20)
+- Un secondo tipo di utente ha la possibilità di multare i vari possessori di patenti detraendo punti da queste. Le multe sono registrate sulla blockchain (vigile , multato, numero di punti  detratti , tipo di violazione)
+- A zero punto la patente è revocata 
+- Al termine di un periodo di validità la patente scade
+
+
+Token Curated Registry: 
+
+Un insieme di utenti mantiene una lista di elementi (l'applicazione potrebe essere costruita per Notizie/ repository di software open source/ attività locali) assicurandosi di inserire nella lsta solo elementi qualitativamente significativi ( no fake news/ software di cattiva qualità/ ristoranti con servizio scadente). Ogni volta che un elemento viene iscritto alla lista , affinché questo sia effettivamente aggiunto deve trascorrere un submission time. All'interno di questa finestra di tempo gli utenti possono lanciare una challenge all'elemento della lista. Se l'elemento viene sfidato si apre una challenge phase nella quale gli utenti possono votare se mantenere o meno l'elemento nella lista. Al concludersi di questa fase l'elemento viene inserito definitivamente o rimosso dalla lista a seconda del risultato delle votazioni.
