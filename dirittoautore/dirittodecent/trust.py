@@ -10,7 +10,7 @@ def trust():
     t = trustitems.pop()
     tfile = open(t.file.name)
     tdata = tfile.read()
-    print("inizio comparazione" + t.id)
+    print("inizio comparazione: " + t.id)
     comparelist = Testo.objects.filter().exclude(id =t.id)
     for c in comparelist:
         cfile =open(c.file.name)
@@ -20,7 +20,7 @@ def trust():
             trust = False
     t.trust = trust
     t.save()
-    print("fine comparazione di "+ t.id + "il trust è "+ trust)
+    print("fine comparazione: "+ t.id + " il trust è "+ str(trust))
 
         
 

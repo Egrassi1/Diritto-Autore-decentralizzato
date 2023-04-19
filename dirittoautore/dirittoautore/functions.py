@@ -1,3 +1,4 @@
+import os
 import string
 from dirittoautore.settings import STATIC_URL
 from dirittodecent.models import Testo
@@ -13,14 +14,22 @@ def handle_uploaded_file(f):
     hash = hashlib.md5(bytes).hexdigest()
     print(hash)
     t = Testo(hash,f,None)
-    var.trustitems.append(t) # il testo viene inserito nella coda per il controllo
-    t.save()   
+
     # se il thread non è stato inizializzato , viene costruito e avviato
     if var.truster == None:
         var.truster = threading.Thread(target=trust)
         var.truster.start()
-
-    var.semtrust.release() # signal sul semaforo del thread
+    filename, ext = os.path.splitext(t.file.name)
+    print(ext)
+     # se il testo  ha un formato valido , viene inserito nella coda per il controllo
+     # altrimenti viene automaticamente segnalato come falso 
+    if ext == ".txt":
+       t.save() 
+       var.trustitems.append(t)
+       var.semtrust.release() # signal sul semaforo del thread
+    else: 
+        t.trust = False
+        t.save()
 
 # questa funzione controlla la corrispondenza tra il testo di una query effettuata dall'utente e i dati recuperati dalla blockchain
 def match(query,data):
@@ -35,3 +44,5 @@ def match(query,data):
 def gettoken():
     id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for i in range(16))
     return id
+
+

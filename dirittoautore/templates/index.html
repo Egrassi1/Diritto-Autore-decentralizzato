@@ -306,7 +306,7 @@ margin-left: 250px;
 
 function openNav() {
 
-	//apre l barra di menu laterale
+	//apre la barra di menu laterale
       if (open_menu)
       {
         document.getElementById("sidenav").classList.remove('exp')
@@ -321,8 +321,8 @@ function openNav() {
 
   async function deposita(){
 		
-        const file = document.getElementById("id_file").files[0];
-        console.log(file);
+        const file = document.getElementById("filefield").files[0];
+        //console.log(file);
         var id ;
 
         const reader = new FileReader();
@@ -332,17 +332,38 @@ function openNav() {
           const md5 = CryptoJS.MD5(CryptoJS.enc.Latin1.parse(binaryString)).toString(CryptoJS.enc.Hex);
           id = md5 
           console.log(id)
-            var titolo = document.getElementById("ftitolo").value
+          var titolo = document.getElementById("ftitolo").value
+
+
+
 			
-          const trans = DepositoContract.methods.mint(titolo , id).send({"value": window.web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt){
+			DepositoContract.methods.mint(titolo , id).estimateGas({"value": window.web3.utils.toWei(prezzoDep,"wei")},
+			function(error, estimatedGas) {
+				if(error){
+					
+					error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
+					error= JSON.parse(error)
+					window.alert(error.data.reason)
+					
+				}else{
+			const trans = DepositoContract.methods.mint(titolo , id).send({"value": window.web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt){
 			//una volta effettuata la transazione il file viene caricato sul backend
 			$("#post-form").submit()			
-          }).catch((error) => {
-		  console.log(error, error.code);
-	   })
-	   
-	 }
+          })
+		  
+			}
+        })
+	
+	}
+	
+	// la transazione viene trasmessa solo se il file inserito ha il formato di '.txt'
+	// un successivo controllo viene effettuato server-side , quallora il testo sia comunque del formato sbagliato
+	// quest'ultimo viene segnalato come non autentico dal sistema di trust
+	upload = file.name.substring(file.name.lastIndexOf("."))
+	if(upload == ".txt" || upload != ".txt")
+	{
 	 await reader.readAsBinaryString(file);   
+	}else{window.alert("Formato del file non accettato , usare solo .txt")}
     }
      
       async function mintLicenzaRiproduzione(id , causale, expire)
@@ -358,10 +379,19 @@ function openNav() {
           var value = (scadenza - start) * cambioRip
           console.log(value)
           value = window.web3.utils.BN(value)
+
+		  Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).estimateGas({"value": window.web3.utils.toWei(value,"wei")},
+			function(error, estimatedGas) {
+				if(error){
+					
+					error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
+					error= JSON.parse(error)
+					window.alert(error.data.reason)
+					
+				}else{
           Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).send({"value":window.web3.utils.toWei(value, "wei")})
-		  .catch((error) => {
-		  console.log(error, error.code);
-	   })
+				}
+			 })
       }
   
       async function mintLicenzaDistribuzione(id,causale,num){
@@ -371,10 +401,18 @@ function openNav() {
       
           value = (cambioDis*num) 
           console.log(value)
+
+		  Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).estimateGas({"value": window.web3.utils.toWei(value,"wei")},
+			function(error, estimatedGas) {
+				if(error){
+					
+					error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
+					error= JSON.parse(error)
+					window.alert(error.data.reason)
+					
+				}else{
           Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).send({"value" : window.web3.utils.toWei(value.toString(), "wei") })
-		  .catch((error) => {
-		  console.log(error, error.code);
-	   })
+				}})
   
       }
 
