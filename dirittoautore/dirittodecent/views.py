@@ -38,6 +38,10 @@ def index(request):
        return render(request,'login.html')
    
 
+def script(request):
+
+    return HttpResponse(var.addressTesto + ";"+ var.addressLicenza)
+
 def search(request):
   
   """

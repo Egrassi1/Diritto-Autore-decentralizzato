@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),  # pagina prncipale
+    path("script/", views.script, name = "script"),
     path("search/",views.search, name = "search"), # richieste per la ricerca di testi o licenze
     path("download/",views.download,name = "download"), # richieste per il download dei testi per qui si è acquistata la licenza
     path("login/",views.login,name = "login"), # richiesta per il loginn
