@@ -17,7 +17,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 STATICFILES_DIRS = [
-    BASE_DIR /"static/js/"
+    BASE_DIR /"static/js/",
+    BASE_DIR /"static/style/"
 ]
 
 

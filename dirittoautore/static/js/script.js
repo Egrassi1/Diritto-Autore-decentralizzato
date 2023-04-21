@@ -10,13 +10,16 @@
 	var cambioRip;
 	var cambioDis;
 	var prezzoDep;
+	var web3;
 
 	async function connetti(){
+		
 
 
 	   if(window.ethereum)
 	 {
-		window.web3 = new Web3(window.ethereum)
+		web3 = new Web3(window.ethereum)
+		
 		var xmlHttp = new XMLHttpRequest();
 		xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/script", false ); 
 	   xmlHttp.send( null );
@@ -27,6 +30,7 @@
 	   await window.ethereum.request({ method: "eth_requestAccounts" })
 	  
 	  .then((accounts) => {
+		
 		  const account = accounts[0]
 		  window.ethereum.accounts = accounts
 			 document.getElementById("portafoglio").innerHTML="portafoglio: "+account
@@ -125,7 +129,7 @@ function openNav() {
 
 
 			
-			DepositoContract.methods.mint(titolo , id).estimateGas({"value": window.web3.utils.toWei(prezzoDep,"wei")},
+			DepositoContract.methods.mint(titolo , id).estimateGas({"value": web3.utils.toWei(prezzoDep,"wei")},
 			function(error, estimatedGas) {
 				if(error){
 					
@@ -134,7 +138,7 @@ function openNav() {
 					window.alert(error.data.reason)
 					
 				}else{
-			const trans = DepositoContract.methods.mint(titolo , id).send({"value": window.web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt){
+			const trans = DepositoContract.methods.mint(titolo , id).send({"value": web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt){
 			//una volta effettuata la transazione il file viene caricato sul backend
 			$("#post-form").submit()			
           })
@@ -166,9 +170,9 @@ function openNav() {
           console.log("expire: "+ scadenza)
           var value = (scadenza - start) * cambioRip
           console.log(value)
-          value = window.web3.utils.BN(value)
+          value = web3.utils.BN(value)
 
-		  Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).estimateGas({"value": window.web3.utils.toWei(value,"wei")},
+		  Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).estimateGas({"value": web3.utils.toWei(value,"wei")},
 			function(error, estimatedGas) {
 				if(error){
 					
@@ -177,7 +181,7 @@ function openNav() {
 					window.alert(error.data.reason)
 					
 				}else{
-          Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).send({"value":window.web3.utils.toWei(value, "wei")})
+          Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).send({"value":web3.utils.toWei(value, "wei")})
 				}
 			 })
       }
@@ -190,7 +194,7 @@ function openNav() {
           value = (cambioDis*num) 
           console.log(value)
 
-		  Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).estimateGas({"value": window.web3.utils.toWei(value.toString(),"wei")},
+		  Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).estimateGas({"value": web3.utils.toWei(value.toString(),"wei")},
 			function(error, estimatedGas) {
 				if(error){
 					
@@ -199,7 +203,7 @@ function openNav() {
 					window.alert(error.data.reason)
 					
 				}else{
-          Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).send({"value" : window.web3.utils.toWei(value.toString(), "wei") })
+          Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).send({"value" : web3.utils.toWei(value.toString(), "wei") })
 				}})
   
       }
@@ -333,7 +337,7 @@ if (containerRip.classList.contains('expanded')){ containerRip.classList.remove(
 //il contract address dei contratti e il portafoglio metamask interagente  (i.e. l'utente loggato)
 
 function buildTestocontract(){
-     DepositoContract = new window.web3.eth.Contract(
+     DepositoContract = new web3.eth.Contract(
 		[
 	{
 		"inputs": [
@@ -607,7 +611,7 @@ function buildTestocontract(){
 
 function buildLicenzacontract()
     {
-			 Licenzacontract = new window.web3.eth.Contract([
+			 Licenzacontract = new web3.eth.Contract([
 	{
 		"inputs": [
 			{

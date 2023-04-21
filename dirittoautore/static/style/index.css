@@ -1,0 +1,152 @@
+body {
+    padding-top:3%;			
+    font-family: Arial, sans-serif;
+    background-color: #F0F8FF;
+    margin: 0px;
+
+}
+
+h2 {
+    padding-left: 0.5%;
+    color: #556B2F;
+}
+p {
+    padding-left: 0.5%;
+    color: #696969;
+}
+button {
+    background-color: #556B2F;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #6B8E23;
+}
+
+
+.sidenav {
+height: 100%;
+width: 0;
+position: fixed;
+z-index: 1;
+top: 0;
+left: 0;
+background-color: #9cd1ff;
+overflow-x: hidden;
+transition: 0.5s;
+padding-top: 30px;
+
+}
+.sidenav.exp{
+box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+width : 250px;
+}
+.menuelement{
+padding-left: 20px;
+}
+
+.menubutton{
+    font-size: 30px;
+    cursor: pointer;
+    color: #6B8E23;
+}
+
+.menu {
+margin-left: 0px;
+transition: 0.5s;
+}
+
+.menuexp{
+
+margin-left: 250px;
+}
+
+.card{
+margin-left: 10px;
+box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+transition: 0.3s;
+width: 50%;
+box-sizing: border-box;
+padding: 1%;
+
+}
+.card.t {
+
+background-color: beige;
+
+}
+
+.card.l{
+background-color: #bcf648f0;
+}
+
+.card:hover {
+box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+
+.right{
+float: right;
+}
+
+.form-container {
+margin-top: 0px;
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.3s ease-in-out;
+background-color: lightgrey ;
+}
+
+.form-container.expanded {
+
+max-height: 500px;
+}
+
+.bar{
+top:0%;
+height: 7%;
+width: 100%;
+position: fixed;
+box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+overflow: hidden;
+margin:0px;
+background-color: #c5e1f9;
+}
+
+.search {
+width: 80%;
+display: flex;
+}
+
+.searchTerm {
+width: 100%;
+border-right: none;
+border: 3px solid #556B2F;
+padding: 5px;
+margin-top: 5px;
+margin-left: 5px;
+height: 20px;
+border-radius: 5px 0 0 5px;
+color: #9DBFAF;
+}
+.searchButton {
+width: 40px;
+height: 36px;
+margin-top: 5px;
+text-align: center;
+background-color: #556B2F;
+border: 1px solid #556B2F;
+border-radius: 0 5px 5px 0;
+border-left: none;
+color: #fff;
+cursor: pointer;
+font-size: 20px;
+display: flex;
+justify-content: center;
+}
+.bold{
+    font-weight:bold;
+}

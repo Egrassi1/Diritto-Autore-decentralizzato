@@ -1,51 +1,20 @@
 <!DOCTYPE html>
 <html>
-    {% csrf_token %}  
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #F0F8FF;
-  
-        }
 
-        .login-form {
-            width: 300px;
-            margin: 0 auto;
-            padding: 30px;
-            background-color: #c5e1f9;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translateX(-50%) translateY(-50%);      
-        }
+{% load static %}
+<link rel="stylesheet" href="{% static '/login.css' %}">
 
-        .login-form h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #556B2F;
-        }
-
-        .login-form button {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            background-color: #556B2F;
-            color: white;
-            font-weight:bold;
-        }
-        
-        .login-form button:hover {
-            background-color: #6B8E23;
-        }
-    </style>
 <head>
+
+  
     <title>Diritto D'autore Decentralizzato</title>
-    <meta
-    http-equiv="Content-Security-Policy"
-    content="default-src 'self'; frame-ancestors 'none'"/>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self';
+    script-src 'self' 
+	'unsafe-inline' 
+    https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js
+    https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js;"
+   >
+   {% csrf_token %}  
 </head>
 
 <body onload = "onload()">
@@ -58,6 +27,8 @@
 <script>
 
 async function onload(){
+
+   
     if(window.ethereum)
 	 {
 		window.web3 = new Web3(window.ethereum)
@@ -65,6 +36,7 @@ async function onload(){
      }else{window.alert("Devi avere Metamask installato sul tuo browser per poter usare questo servizio");}
 
 }
+
 
 async function login(){
      //recupero nonce casuale da firmare
@@ -101,4 +73,5 @@ xhr.send(JSON.stringify(data));
 
 <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
 </html>
