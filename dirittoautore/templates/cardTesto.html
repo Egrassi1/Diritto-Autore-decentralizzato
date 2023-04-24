@@ -5,8 +5,8 @@
     <p>autore :{{autore}} </p>
     <p>data di deposito: {{data}}</p> <br>
     <p>Acquista:
-        <button class="lic-btn" onclick="espandidis('{{id}}')">licenza distribuzione</button>
-        <button class="lic-btn" onclick="espandiRip('{{id}}')">licenza riproduzione</button></p>
+        <button class="lic-btn D" id ="{{id}}">licenza distribuzione</button>
+        <button class="lic-btn R" id="{{id}}">licenza riproduzione</button></p>
 </div>
 <!--form per l'acquisto delle licenze di riproduzione e distribuzione-->
 
@@ -15,7 +15,7 @@
     <p>Scadenza: <input type="date" id='Rdat{{id}}'> </p>  
     <p>Causale:</p>
     <textarea id="Rcau{{id}}" rows="4" cols="50"></textarea> 
-    <p><button onclick = "mintLicenzaRiproduzione('{{id}}',document.getElementById('Rcau{{id}}').value,document.getElementById('Rdat{{id}}').value)">conferma e acquista</button>    
+    <p><button class = "rip" id = "{{id}}">conferma e acquista</button>    
     <div class="right" id ="Rcos{{id}}">costo: 0 WEI</div></p>  
 </div>
 
@@ -24,7 +24,7 @@
     <p>Numero copie: <input id="Dnum{{id}}" type="number" value="42" /></p> 
     <p>Causale:</p>
     <textarea id='Dcau{{id}}' rows="4" cols="50"></textarea>  
-<p><button onclick = "mintLicenzaDistribuzione('{{id}}',document.getElementById('Dcau{{id}}').value,document.getElementById('Dnum{{id}}').value)">conferma e acquista</button> 
+<p><button class = "dis" id = "{{id}}">conferma e acquista</button> 
     <div class="right" id ="Dcos{{id}}">costo: 0 WEI</div></p> 
 </div>
 </div><br>

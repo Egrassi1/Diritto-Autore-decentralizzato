@@ -1,0 +1,36 @@
+
+Diritto d'autore decentralizzato-
+Analisi ed implementazione di smart contracts utilizzando il tool Metamask per interagire con una blockchain basata su ethereum
+
+
+Requisiti di progetto
+
+Introduzione alle tecnologie utilizzate
+	-Blockchain 
+	-Ethereum
+	-Metamask
+
+
+- Resoconto di sviluppo
+
+	- definizione dei contratti su solidity
+		- solidity aspetti principalli
+		-abi
+		-funzionamento di un contratto
+
+	- front end 
+		- javascript e web3.js
+
+-back end
+	-framework django
+	-web3.py (deploy di un contratto , 
+- scalabilità?
+
+
+
+TODO:
+Lettura dei messaggi d'errore
+
+funzione per la convalida di un certificato a partire dall'id 
+
+

@@ -12,10 +12,24 @@
 	var prezzoDep;
 	var web3;
 
+	var formbtnD;
+	var formbtnR;
+
+	var Disbtn;
+	var Ripbtn
+
+
+	window.addEventListener("load",connetti)
+	document.getElementById("menubutton").addEventListener("click",openNav)
+	document.getElementById("search").addEventListener("click",search)
+	document.getElementById("btn_dep").addEventListener("click",deposita)
+	document.getElementById("mode").addEventListener("click",selectmode)
+	document.getElementById("ban").addEventListener("click",ban)
+	document.getElementById("unban").addEventListener("click",unban)
+	document.getElementById("logout").addEventListener("click",logout)
+
+
 	async function connetti(){
-		
-
-
 	   if(window.ethereum)
 	 {
 		web3 = new Web3(window.ethereum)
@@ -66,14 +80,48 @@
 				window.ethereum.on('accountsChanged', function (accounts) {
 					window.location.replace("http://127.0.0.1:8000/dirittocenet/logout");
 				})
+
+
+		/*	
+				let options = {
+					fromBlock: 'latest',
+					address: Licenzacontractaddress
+				};
+				
+				let subscription = web3.eth.subscribe('logs', options,(err,event) => {
+					if (!err) console.log(event)
+				}).on("data", function(log){
+					console.log(log)
+				});
+*/
+
+
+			Licenzacontract.events.RilascioLicenza({
+				fromBlock: 'latest'
+			}, (error, event) => {
+				if (error) {
+					console.error(error);
+				} else {
+					// Access the event data
+					console.log("notifica")
+					// ...
+				}
+			}).on("data", function(log){
+				console.log(log)
+			});
+		
 		
 	   }).catch((error) => {
 		  console.log(error, error.code);
 	   })
+	  
 	 }
 	 else{
 	   console.log("errore , metamask non abilitato")
 	 }
+
+
+	
 	}
 
   function logout(){
@@ -158,8 +206,11 @@ function openNav() {
 	}else{window.alert("Formato del file non accettato , usare solo .txt")}
     }
      
-      async function mintLicenzaRiproduzione(id , causale, expire)
+async function mintLicenzaRiproduzione(event)
       {
+			id = event.target.id 
+			causale = document.getElementById('Rcau'+id).value
+			expire = document.getElementById('Rdat'+id).value
           //calcolo del costo
           expire = document.getElementById("Rdat"+id)
           var today = new Date();
@@ -186,10 +237,11 @@ function openNav() {
 			 })
       }
   
-      async function mintLicenzaDistribuzione(id,causale,num){
+async function mintLicenzaDistribuzione(event){
           //calcolo del costo
-          console.log(id)
-          console.log(causale)
+		  id = event.target.id 
+		  causale = document.getElementById('Dcau'+id).value
+		  num = document.getElementById('Dnum'+id).value
       
           value = (cambioDis*num) 
           console.log(value)
@@ -251,6 +303,44 @@ async function listTesti() {
     xmlHttp.send( null );
 	document.getElementById("elenco").innerHTML = ""
 	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
+
+	if (Disbtn != undefined){
+	Disbtn.forEach(function(but){
+		but.removeEventListener('click',mintLicenzaDistribuzione)
+	})
+
+	Ripbtn.forEach(function(but){
+		but.removeEventListener('click',mintLicenzaRiproduzione)
+	})
+
+	formbtnR.forEach(function(but){
+		but.removeEventListener('click', espandiRip)
+	})
+
+	formbtnD.forEach(function(but){
+		but.removeEventListener('click', espandidis)
+	})
+	}
+
+	Disbtn = document.querySelectorAll(".dis")
+	Disbtn.forEach(function(but){
+		but.addEventListener('click',mintLicenzaDistribuzione)
+	})
+
+	Ripbtn = document.querySelectorAll(".rip")
+	Ripbtn.forEach(function(but){
+		but.addEventListener('click',mintLicenzaRiproduzione)
+	})
+
+	formbtnR = document.querySelectorAll(".lic-btn.R")
+	formbtnR.forEach(function(but){
+		but.addEventListener('click', espandiRip)
+	})
+
+	formbtnD =  document.querySelectorAll(".lic-btn.D")
+	formbtnD.forEach(function(but){
+		but.addEventListener('click', espandidis)
+	})
 	  }
   
 async function listLicenze(){
@@ -262,10 +352,10 @@ async function listLicenze(){
 	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
     }
   
-function espandiRip(id){
+function espandiRip(event){
 	//gli element di ciascuna card costituente il testo sono identificati tramite id composto da una nome che identifica
 	// l'element(bottone , label ,etc.) + id univoco del testo depositoato
-
+id = event.target.id
 const idRip= "R"+id //bottone per la licenza di riproduzione
 const idDis = "D"+id //bottone per la licenza di distribuzione
 const idData = "Rdat"+id //input type data per la data di scadenza della licenza di riproduzione
@@ -299,8 +389,9 @@ if(value >0 ){costo.innerHTML= "costo : "+value +"WEI"}
 
 }
 
-function espandidis(id){
+function espandidis(event){
 
+id = event.target.id
 const idRip= "R"+id
 const idDis = "D"+id
 const idNum = "Dnum"+id //input type per il numero di copie autorizzato dalla licenza di distribuzione

@@ -10,67 +10,21 @@
     <title>Diritto D'autore Decentralizzato</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self';
     script-src 'self' 
-	'unsafe-inline' 
+	
     https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js
     https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js;"
    >
    {% csrf_token %}  
 </head>
 
-<body onload = "onload()">
+<body >
     <div class="login-form">
         <h2>Login</h2>
-            <button onclick="login()">Accedi con il tuo Metamask</button>       
+            <button id = "login" >Accedi con il tuo Metamask</button>       
     </div>
 </body>
 
-<script>
-
-async function onload(){
-
-   
-    if(window.ethereum)
-	 {
-		window.web3 = new Web3(window.ethereum)
-	   await window.ethereum.request({ method: "eth_requestAccounts" })
-     }else{window.alert("Devi avere Metamask installato sul tuo browser per poter usare questo servizio");}
-
-}
-
-
-async function login(){
-     //recupero nonce casuale da firmare
-     xhr = new XMLHttpRequest();
-	 xhr.open("GET", "http://127.0.0.1:8000/dirittocenet/token/?q="+window.ethereum.selectedAddress,false);
-
-    xhr.send(null)
-	nonce = xhr.response
-	console.log(nonce)
-	firma =  await web3.eth.personal.sign(nonce,window.ethereum.selectedAddress)
-			 
-	xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://127.0.0.1:8000/dirittocenet/login/");
-    xhr.setRequestHeader("Accept", "application/json");
-	xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
-    xhr.setRequestHeader("Content-Type", "application/json");
-
-    xhr.onreadystatechange = function () {  //status 200 
-  if (xhr.readyState === 4) {
-    console.log(xhr.status);
-    window.location.replace("http://127.0.0.1:8000/dirittocenet");
-  }};
-
-//il json inviato al backend consta della firma e del messaggio originale(nonce). Il backend controlla che il messaggio sia stato firmato 
-//da un account per cui è stata aperta la richiesta di login e che il nonce corrisponda .
-let data = { 
-"firma": firma,
-"msg": nonce
-};
-
-xhr.send(JSON.stringify(data));
-}
-</script>
-
+<script src="{%static '/login.js'%}"></script> 
 <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 

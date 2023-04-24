@@ -1,8 +1,12 @@
+from asyncore import loop
 from django.apps import AppConfig
 import os
 from web3 import Web3
 from solcx import compile_files, install_solc
 import dirittoautore.var as var
+
+import threading
+import time
 
 
 #all'avvio del server viene effettuato il deploy dei contratti
@@ -39,7 +43,9 @@ class DirittodecentConfig(AppConfig):
         tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
         print(tx_receipt.contractAddress)
         var.addressLicenza = str(tx_receipt.contractAddress)
-      
+
+
+         
     def ready(self):
         if os.environ.get('RUN_MAIN'):
             print('Deploy dei contratti')

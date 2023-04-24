@@ -24,7 +24,7 @@
 
 
   script-src 'self' 
-	'unsafe-inline' 
+
 	 https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js
 	 https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js 
 	 https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js;"
@@ -35,16 +35,16 @@
 </head>
 
 
-<body onload = "connetti()">
+<body>
 <!-- menu -->
 <div id="menu" class = "menu">
 	
     <div class = "bar">  
 		
         <div class="search">
-           <span class="menubutton" onclick="openNav()">&#9776;</span> 
+           <span id = "menubutton" class="menubutton">&#9776;</span> 
            <input type="text" id ="ricerca" class="searchTerm" placeholder="Ricerca per titolo o per autore">
-           <button onclick="search()" class="searchButton"> <i class="fa fa-search"></i></button>
+           <button id = "search" class="searchButton"> <i class="fa fa-search"></i></button>
           </button>
         </div>
 
@@ -64,19 +64,19 @@
         {% csrf_token %}  
         {{ form.as_p }}  
     </form><br> <br>
-    <button id="btn_connect"  onclick = "deposita()">deposita </button> <br> <br>
+    <button id="btn_dep">deposita </button> <br> <br>
 
-	<button id = "mode" onclick="selectmode()" >visualizza le tue licenze</button> <br><br>
+	<button id = "mode">visualizza le tue licenze</button> <br><br>
 
 	<p>Banna un utente dall'acquistare le licenze per i tuoi testi:</p>
 	<input type="text" id="banuser" name="ftitolo" value="..."><br><br>
-	<button id = "mode" onclick="ban()" >banna</button> <br><br><br>
+	<button id = "ban" >banna</button> <br><br><br>
 
 	<p>Sblocca un utente:</p>
 	<input type="text" id="unbanuser" name="ftitolo" value="..."><br><br>
-	<button id = "mode" onclick="unban()" >sblocca</button> <br><br>
+	<button id = "unban" >sblocca</button> <br><br>
 
-	<div class = "right"><button id = "mode" onclick="logout()" >logout</button> </div>
+	<div class = "right"><button id = "logout">logout</button> </div>
 </div>
 </div>
 

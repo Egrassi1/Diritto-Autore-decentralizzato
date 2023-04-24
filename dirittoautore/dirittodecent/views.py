@@ -12,16 +12,20 @@ from django.http import HttpResponse
 import dirittoautore.var as var
 from django.contrib.auth.models import User
 
+import binascii
+
 
 
 def index(request):
-   
    """ Se l'utente è autenticato:
     - in caso di richiesta get viene caricato il template index.html
     - in caso di richiesta post viene prima gestito l'upload del file sul server
       e poi viene ricaricata la pagina perché è necessario rigenerare il token csrf
       Se l'utente non è autenticato viene caricato il template login.html
    """
+   if (request.user == 'eugenio'):
+       logout(request)
+
    if request.user.is_authenticated:  
       print(request.user)
       file = UploadFileForm()
@@ -157,37 +161,37 @@ def search(request):
       
 
 def download(request):
-
     query= request.GET.get('q', None)
-  
     #bisogna controllare che la licenza per cui è fatta la richeista di download appartenga all'utente autenticato 
-
     event_signature_hash = var.web3.keccak(text="RilascioLicenza(bool,address,address,string,string,uint256,bytes20,uint256)").hex()
-    event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressLicenza, 'topics': [event_signature_hash], 'filter': {"id": query}})
+    event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressLicenza, 'topics': [event_signature_hash]})
     event_logs = event_filter.get_all_entries()
-
+    print(event_logs)
     for e in event_logs:
         tx_hash = e['transactionHash']
         receipt = var.web3.eth.get_transaction_receipt(tx_hash)
         valori = var.contrattoLicenza.events.RilascioLicenza().process_receipt(receipt)
         valori = valori[0].args
         print(valori)
-        prop = valori['proprietario']
-        print(prop)
-        a = str(request.user)
-        b = str(prop).upper()
-    
-        if (a == b):
+        id = valori['id'].hex()
+        if(id == query):
+            prop = valori['proprietario']
 
-            testo = Testo.objects.get(id = valori['id_testo'])
-            
-            file_path = testo.file.name
-            if os.path.exists(file_path):
-                with open(file_path, 'rb') as fh:
-                     response = HttpResponse(fh.read(), content_type="application/text-plain")
-                     response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
-                     return response
-        return HttpResponse("Non hai accesso a questo contenuto")
+            print(prop)
+            a = str(request.user)
+            b = str(prop).upper()
+        
+            if (a == b):
+
+                testo = Testo.objects.get(id = valori['id_testo'])
+                
+                file_path = testo.file.name
+                if os.path.exists(file_path):
+                    with open(file_path, 'rb') as fh:
+                        response = HttpResponse(fh.read(), content_type="application/text-plain")
+                        response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+                        return response
+    return HttpResponse("Non hai accesso a questo contenuto")
 
 
 def login(request):
