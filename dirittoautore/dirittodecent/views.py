@@ -12,7 +12,7 @@ from django.http import HttpResponse
 import dirittoautore.var as var
 from django.contrib.auth.models import User
 
-import binascii
+import math
 
 
 
@@ -52,19 +52,33 @@ def search(request):
   le richieste sono dstinte dal campo t ,  t == T significa che l'utente ricerca un testo , t == L una licenza
   testi e licenze vengono recuperati leggendo gli eventi emessi sulla blockchain
   """
+
+
+
   if request.method == 'GET' :
         query= request.GET.get('q', None)
         tipo = request.GET.get('t', None)
+        pagina = request.GET.get('p', None)
         res = "" 
         resTit = ""
         resAut = ""
         if tipo == 'T':
           
+
            event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex() # viene calcolata la firma dell'evento
            event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressTesto, 'topics': [event_signature_hash]})
           # si costruisce un event filter per l'evento specifico del relativo contratto e si leggono tutte le transazioni dal blocco 0
            event_logs = event_filter.get_all_entries()
-           for e in event_logs:
+
+           leng = len(event_logs)
+           pages = round(leng/2)
+           current = (int(pagina)-1)*2
+        
+
+           for i in range(current, current+2):
+               if(i >= leng) : break
+
+               e = event_logs[i]
                tx_hash = e['transactionHash']
                receipt = var.web3.eth.get_transaction_receipt(tx_hash)
                valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
@@ -91,13 +105,13 @@ def search(request):
                else:
                   if(match(query,titolo)): resTit =  render_to_string('cardTesto.html', context) +resTit
                   elif(match(query,autore)): resAut = render_to_string('cardTesto.html', context) + resAut
-           if(query == ""): return HttpResponse(res)   
+           if(query == ""): return HttpResponse(str(pages)+"."+res)   
            # se il campo q è vuoto la ricerca è mirata a visualizzare tutti i risultanti 
            # non è necessario dividere per autore o titolo
            else:
             if(resTit != "") :resTit = "<p>per titolo</p>"+ resTit
             if(resAut!= ""): resAut = "<p>per autore</p>"+ resAut  
-           return HttpResponse(resTit+resAut)
+           return HttpResponse(str(pages)+"."+resTit+resAut)
       
         elif tipo == 'L':           
             tipolog =""
@@ -109,8 +123,18 @@ def search(request):
             id = ""
             event_signature_hash = var.web3.keccak(text="RilascioLicenza(bool,address,address,string,string,uint256,bytes20,uint256)").hex()
             event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressLicenza, 'topics': [event_signature_hash]})
+            
             event_logs = event_filter.get_all_entries()
-            for e in event_logs:
+
+            leng = len(event_logs)
+            pages = round(leng/2)
+            current = (int(pagina)-1)*2
+        
+
+            for i in range(current, current+2):
+               if(i >= leng) : break
+
+               e = event_logs[i]
                tx_hash = e['transactionHash']
                receipt = var.web3.eth.get_transaction_receipt(tx_hash)
                valori = var.contrattoLicenza.events.RilascioLicenza().process_receipt(receipt)
@@ -150,11 +174,11 @@ def search(request):
                      res =  render_to_string('cardLicenza.html', context) +res
                   elif(match(query,titolo)): resTit =  render_to_string('cardLicenza.html', context) +resTit
                   elif(match(query,id)): resAut = render_to_string('cardLicenza.html', context) + resAut
-            if(query == ""): return HttpResponse(res)
+            if(query == ""): return HttpResponse(str(pages)+"."+res)
             else:
               if(resTit != "") :resTit = "<p>per Titolo</p>"+ resTit
               if(resAut!= ""): resAut = "<p>per Id</p>"+ resAut  
-              return HttpResponse(resTit+resAut)
+              return HttpResponse(str(pages)+"."+resTit+resAut)
                  
 
 

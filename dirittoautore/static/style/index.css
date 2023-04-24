@@ -3,7 +3,6 @@ body {
     font-family: Arial, sans-serif;
     background-color: #F0F8FF;
     margin: 0px;
-
 }
 
 h2 {
@@ -18,8 +17,8 @@ button {
     background-color: #556B2F;
     color: white;
     padding: 10px 20px;
-    border: none;
     border-radius: 4px;
+    border-color: #475927;
     cursor: pointer;
 }
 button:hover {
@@ -60,7 +59,6 @@ transition: 0.5s;
 }
 
 .menuexp{
-
 margin-left: 250px;
 }
 
@@ -74,9 +72,7 @@ padding: 1%;
 
 }
 .card.t {
-
 background-color: beige;
-
 }
 
 .card.l{
@@ -87,9 +83,9 @@ background-color: #bcf648f0;
 box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 }
 
-
 .right{
 float: right;
+margin-right: 2%;
 }
 
 .form-container {
@@ -101,7 +97,6 @@ background-color: lightgrey ;
 }
 
 .form-container.expanded {
-
 max-height: 500px;
 }
 
@@ -132,6 +127,8 @@ height: 20px;
 border-radius: 5px 0 0 5px;
 color: #9DBFAF;
 }
+
+
 .searchButton {
 width: 40px;
 height: 36px;
@@ -149,4 +146,20 @@ justify-content: center;
 }
 .bold{
     font-weight:bold;
+}
+
+.pages{
+    visibility: hidden;
+
+    margin-left: 50%;
+    display:flex;
+}
+.pages button{
+    margin-left: 0.5%;
+    padding-top:0;		
+    padding : 0px 4px;
+    border-radius: 20px;
+}
+.pages.v{
+   visibility: visible;
 }

@@ -18,6 +18,33 @@
 	var Disbtn;
 	var Ripbtn
 
+	var page = 1;
+	var pagemax;
+
+
+	function pageup(){
+		page = page+1
+
+
+		if(document.getElementById("pagedown").disabled == true) {document.getElementById("pagedown").disabled = false}
+		if (page >= pagemax)
+		{
+			document.getElementById("pageup").disabled = true
+		}
+		search()
+	}
+
+	function pagedown(){
+		page = page-1
+
+		if (document.getElementById("pageup").disabled == true) document.getElementById("pageup").disabled = false
+
+		if (page <= 1)
+		{
+			document.getElementById("pagedown").disabled = true
+		}
+		search()
+	}
 
 	window.addEventListener("load",connetti)
 	document.getElementById("menubutton").addEventListener("click",openNav)
@@ -27,6 +54,9 @@
 	document.getElementById("ban").addEventListener("click",ban)
 	document.getElementById("unban").addEventListener("click",unban)
 	document.getElementById("logout").addEventListener("click",logout)
+	document.getElementById("pageup").addEventListener("click",pageup)
+	document.getElementById("pagedown").addEventListener("click",pagedown)
+
 
 
 	async function connetti(){
@@ -53,7 +83,9 @@
 
 			 buildTestocontract()
 			 buildLicenzacontract()
-             listTesti()
+          
+
+			  search()
 
 			  DepositoContract.getPastEvents("cambioprezzoDeposito",{
               fromBlock: 0,
@@ -133,15 +165,16 @@
 
 	const but = document.getElementById("mode")
 	document.getElementById("elenco").innerHTML = ""
+	document.getElementById("ricerca").value = ""
 	if(but.innerHTML == "visualizza le tue licenze")
 	{
 		but.innerHTML = "visualizza i testi depositati"
-		listLicenze()
+		
 
 	}else{
 		but.innerHTML = "visualizza le tue licenze" 
-		listTesti()
 }
+search()
 }
 
 function openNav() {
@@ -279,30 +312,59 @@ async function unban(){
 
 
 async function search(){
+
+
+	var resp =(xmlHttp) =>{
+		xmlHttp.send( null );
+		console.log(xmlHttp.response)
+		document.getElementById("elenco").innerHTML = ""
+	
+	
+		response = xmlHttp.response
+		console.log(response)
+		ind = response.indexOf(".")
+	
+		pagemax = response.slice(0,ind)
+		res= response.slice(ind+1)
+		document.getElementById("elenco").insertAdjacentHTML("afterbegin",res)
+		if (pagemax > 1){
+			document.getElementById("pages").classList.add("v")
+		}else{
+			document.getElementById("pages").classList.remove("v")
+		}
+		document.getElementById("pgindex").innerText= String(page)+ " di "+ String(pagemax)
+
+	}
+
 	const but = document.getElementById("mode")
 	const query = document.getElementById("ricerca").value
 	var xmlHttp = new XMLHttpRequest();
 	if(but.innerHTML == "visualizza le tue licenze")
 	{
-    xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=T", false ); 
+	link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=T"+"&p="+String(page)
+    xmlHttp.open( "GET", link,  false ); 
+	resp(xmlHttp)
+	listTesti()
+	
+	
 	}else{
-		xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=L", false );
+		link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=L"+"&p="+page
+		xmlHttp.open( "GET",link , false );
+		resp(xmlHttp)
 	}
-	xmlHttp.send( null );
-	console.log(xmlHttp.response)
-	document.getElementById("elenco").innerHTML = ""
-	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
 
 }
 
 
 async function listTesti() {
 
+	/** 
 	var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q=&t=T", false ); 
     xmlHttp.send( null );
 	document.getElementById("elenco").innerHTML = ""
 	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
+	**/
 
 	if (Disbtn != undefined){
 	Disbtn.forEach(function(but){
@@ -344,12 +406,14 @@ async function listTesti() {
 	  }
   
 async function listLicenze(){
+	/** 
 
 	var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q=&t=L", false ); 
     xmlHttp.send( null );
 	document.getElementById("elenco").innerHTML = ""
 	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
+	*/
     }
   
 function espandiRip(event){
