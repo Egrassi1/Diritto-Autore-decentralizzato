@@ -13,23 +13,35 @@ def handle_uploaded_file(f):
     bytes = f.read() 
     hash = hashlib.md5(bytes).hexdigest()
     print(hash)
-    t = Testo(hash,f,None)
 
-    # se il thread non è stato inizializzato , viene costruito e avviato
-    if var.truster == None:
-        var.truster = threading.Thread(target=trust)
-        var.truster.start()
-    filename, ext = os.path.splitext(t.file.name)
-    print(ext)
-     # se il testo  ha un formato valido , viene inserito nella coda per il controllo
-     # altrimenti viene automaticamente segnalato come falso 
-    if ext == ".txt":
-       t.save() 
-       var.trustitems.append(t)
-       var.semtrust.release() # signal sul semaforo del thread
-    else: 
-        t.trust = False
-        t.save()
+    # viene effettuato un doppio controllo sulla transazione
+    event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex()
+    event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, arguments = {"token_id": hash})
+    event_logs = event_filter.get_all_entries()
+    e = event_logs[0]
+    tx_hash = e['transactionHash']
+    receipt = var.web3.eth.get_transaction_receipt(tx_hash)
+    valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
+    valori = valori[0].args 
+    token_id = valori["token_id"]
+
+    if(token_id == hash):
+        t = Testo(hash,f,None)
+        # se il thread non è stato inizializzato , viene costruito e avviato
+        if var.truster == None:
+            var.truster = threading.Thread(target=trust)
+            var.truster.start()
+        filename, ext = os.path.splitext(t.file.name)
+        print(ext)
+        # se il testo  ha un formato valido , viene inserito nella coda per il controllo
+        # altrimenti viene automaticamente segnalato come falso 
+        if ext == ".txt":
+            t.save() 
+            var.trustitems.append(t)
+            var.semtrust.release() # signal sul semaforo del thread
+        else: 
+                t.trust = False
+                t.save()
 
 # questa funzione controlla la corrispondenza tra il testo di una query effettuata dall'utente e i dati recuperati dalla blockchain
 def match(query,data):

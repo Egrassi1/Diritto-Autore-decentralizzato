@@ -23,10 +23,13 @@ contract DepositoTesti{
 
   mapping(address => address[]) banned ; // portafogli bannati dall'autore
 
-uint prezzoDeposito;
+  uint prezzoDeposito;
 
  event Deposito(address indexed sender,string  token_id,string titolo, uint data);    
  event cambioprezzoDeposito(uint prezzo);
+
+ event banevent (address indexed sender, address indexed target);
+ event unbanevent (address indexed sender, address indexed target);
 
  constructor(uint prezzo) 
 {
@@ -81,8 +84,9 @@ function validDeposito(string calldata token_id) public view returns(bool validi
 
 // fuznioni per bannare o sbannare portafogli
     function ban(address target) external{
-
+      require(msg.sender != target, "non e' possibile bannare se stessi");
       banned[msg.sender].push(target);
+      emit banevent(msg.sender, target);
     }
 
 
@@ -94,6 +98,7 @@ function validDeposito(string calldata token_id) public view returns(bool validi
         {
           banned[msg.sender][i] = banned[msg.sender][ banned[msg.sender].length -1];
           banned[msg.sender].pop();
+          emit unbanevent(msg.sender, target);
         }
       }
     }

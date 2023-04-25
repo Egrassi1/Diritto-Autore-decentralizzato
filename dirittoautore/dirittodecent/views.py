@@ -74,7 +74,6 @@ def search(request):
            pages = round(leng/2)
            current = (int(pagina)-1)*2
         
-
            for i in range(current, current+2):
                if(i >= leng) : break
 
@@ -113,7 +112,8 @@ def search(request):
             if(resAut!= ""): resAut = "<p>per autore</p>"+ resAut  
            return HttpResponse(str(pages)+"."+resTit+resAut)
       
-        elif tipo == 'L':           
+        elif tipo == 'L': 
+
             tipolog =""
             propietario = ""
             autore = ""
@@ -167,7 +167,7 @@ def search(request):
                    "time": data,
                    "data": desc,
                    "id": id,
-                   "link": "http://127.0.0.1:8000/dirittocenet/download/?q="+id # viene aggiunto al template il link per il download del testo
+                   "link": 'http://127.0.0.1:8000/dirittocenet/download/?q='+id # viene aggiunto al template il link per il download del testo
                }
                   
                   if(query == ""):
@@ -179,10 +179,120 @@ def search(request):
               if(resTit != "") :resTit = "<p>per Titolo</p>"+ resTit
               if(resAut!= ""): resAut = "<p>per Id</p>"+ resAut  
               return HttpResponse(str(pages)+"."+resTit+resAut)
-                 
 
+        elif tipo == 'mT':
+            
+           event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex() # viene calcolata la firma dell'evento
+           event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressTesto, 'topics': [event_signature_hash]})
+           event_logs = event_filter.get_all_entries()
+           leng = len(event_logs)
+           pages = round(leng/2)
+           current = (int(pagina)-1)*2       
+           for i in range(current, current+2):
+               if(i >= leng) : break
 
-      
+               e = event_logs[i]
+               tx_hash = e['transactionHash']
+               receipt = var.web3.eth.get_transaction_receipt(tx_hash)
+               valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
+
+               a = str(request.user)
+               valori = valori[0].args 
+               autore = valori["sender"]
+        
+               if (a == str(autore).upper()):
+                    
+                     
+                    titolo =   valori["titolo"]
+                    id = valori["token_id"]
+                    
+                    data = datetime.utcfromtimestamp(valori["data"]).strftime('%Y-%m-%d %H:%M:%S')
+
+                    
+                    trust = Testo.objects.get(id= id).trust
+                    if (trust): trust = "Testo Verificato"
+                    elif(not trust) : trust = "Testo Segnalato come non autentico "
+                    else : trust = "Testo in attesa di verifica"
+
+                    context = {"titolo" : titolo,
+                        "id": id,
+                        "autore":autore ,
+                        "data":data,
+                        "trust": trust}
+                    if(query == ""):
+                        res =  render_to_string('cardTesto.html', context) +res
+                    else:
+                        if(match(query,titolo)): res =  render_to_string('cardTesto.html', context) +resTit
+           return HttpResponse(str(pages)+"."+res) 
+
+        elif tipo == 'mL':
+                      
+            tipolog =""
+            propietario = ""
+            autore = ""
+            titolo = ""
+            data = ""
+            desc = ""
+            id = ""
+            event_signature_hash = var.web3.keccak(text="RilascioLicenza(bool,address,address,string,string,uint256,bytes20,uint256)").hex()
+            event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressLicenza, 'topics': [event_signature_hash]})
+            
+            event_logs = event_filter.get_all_entries()
+
+            leng = len(event_logs)
+            pages = round(leng/2)
+            current = (int(pagina)-1)*2
+        
+
+            for i in range(current, current+2):
+               if(i >= leng) : break
+
+               e = event_logs[i]
+               tx_hash = e['transactionHash']
+               receipt = var.web3.eth.get_transaction_receipt(tx_hash)
+               valori = var.contrattoLicenza.events.RilascioLicenza().process_receipt(receipt)
+               valori = valori[0].args  
+
+               proprietario = valori['proprietario']
+               autore =valori['autore']
+               titolo = valori['testo']
+               data = datetime.utcfromtimestamp(valori["time"]).strftime('%Y-%m-%d %H:%M:%S')
+               desc = valori['dati']
+               id = valori["id"].hex()
+
+               a = str(request.user)
+               b= str(autore).upper()
+
+               if (a == b):
+                  if(valori['tipo']):
+                        tipolog = "Licenza di Riproduzione"
+                        desc = "Scadenza : " + datetime.utcfromtimestamp(desc).strftime('%Y-%m-%d %H:%M:%S')
+                  else:
+                      tipolog ="Licenza di Distribuzione"
+                      desc = "Copie da Distribuire :" + str(desc)
+                  context = {
+                   "tipo": tipolog,
+                   "proprietario": proprietario,
+                   "autore": autore,
+                   "titolo": titolo,
+                   "time": data,
+                   "data": desc,
+                   "id": id,
+                   "link": 'http://127.0.0.1:8000/dirittocenet/download/?q='+id
+                  
+               
+               }
+                  
+                  if(query == ""):
+                     res =  render_to_string('cardLicenza.html', context) +res
+                  elif(match(query,titolo)): resTit =  render_to_string('cardLicenza.html', context) +resTit
+                  elif(match(query,id)): resAut = render_to_string('cardLicenza.html', context) + resAut
+            if(query == ""): return HttpResponse(str(pages)+"."+res)
+            else:
+              if(resTit != "") :resTit = "<p>per Titolo</p>"+ resTit
+              if(resAut!= ""): resAut = "<p>per Id</p>"+ resAut  
+              return HttpResponse(str(pages)+"."+resTit+resAut)
+
 
 def download(request):
     query= request.GET.get('q', None)
@@ -200,12 +310,13 @@ def download(request):
         id = valori['id'].hex()
         if(id == query):
             prop = valori['proprietario']
-
-            print(prop)
+            aut = valori['autore']
+           
             a = str(request.user)
             b = str(prop).upper()
+            c = str(aut).upper()
         
-            if (a == b):
+            if (a == b or a == c):
 
                 testo = Testo.objects.get(id = valori['id_testo'])
                 

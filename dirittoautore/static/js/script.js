@@ -21,6 +21,9 @@
 	var page = 1;
 	var pagemax;
 
+	tipo = document.getElementById("tipo")
+
+	var _a;
 
 	function pageup(){
 		page = page+1
@@ -50,14 +53,25 @@
 	document.getElementById("menubutton").addEventListener("click",openNav)
 	document.getElementById("search").addEventListener("click",search)
 	document.getElementById("btn_dep").addEventListener("click",deposita)
-	document.getElementById("mode").addEventListener("click",selectmode)
 	document.getElementById("ban").addEventListener("click",ban)
 	document.getElementById("unban").addEventListener("click",unban)
 	document.getElementById("logout").addEventListener("click",logout)
 	document.getElementById("pageup").addEventListener("click",pageup)
 	document.getElementById("pagedown").addEventListener("click",pagedown)
 
+	tipo.addEventListener("change",mode)
 
+
+function mode(){
+
+	document.getElementById("elenco").innerHTML = ""
+	document.getElementById("ricerca").value = ""
+	page = 1
+	document.getElementById("pagedown").disabled = true
+	document.getElementById("pageup").disabled = false
+	search()
+
+}
 
 	async function connetti(){
 	   if(window.ethereum)
@@ -82,9 +96,7 @@
 
 
 			 buildTestocontract()
-			 buildLicenzacontract()
-          
-
+			 buildLicenzacontract()          
 			  search()
 
 			  DepositoContract.getPastEvents("cambioprezzoDeposito",{
@@ -136,12 +148,96 @@
 				} else {
 					// Access the event data
 					console.log("notifica")
-					// ...
+					if(String(event.returnValues['autore']).toUpperCase == String(window.ethereum.selectedAddress).toUpperCase)
+					{
+						
+					}
+					
+				}
+			}).on("data", function(log){
+				console.log(log)
+			});
+			
+
+			DepositoContract.events.cambioprezzoDeposito({
+				fromBlock: 'latest'
+			}, (error, event) => {
+				if (error) {
+					console.error(error);
+				} else {
+					// Access the event data				
+					cambioprezzoDeposito= event.returnValues['prezzo']					
+				}
+			}).on("data", function(log){
+				console.log(log)
+			});
+
+			Licenzacontract.events.changeCambioRip({
+				fromBlock: 'latest'
+			}, (error, event) => {
+				if (error) {
+					console.error(error);
+				} else {
+					// Access the event data
+					console.log("notifica")
+					cambioRip=event.returnValues['cambio']
+				}
+			}).on("data", function(log){
+				console.log(log)
+			});
+
+			Licenzacontract.events.changeCambioDis({
+				fromBlock: 'latest'
+			}, (error, event) => {
+				if (error) {
+					console.error(error);
+				} else {
+					// Access the event data
+					console.log("notifica")
+					cambioDis=event.returnValues['cambio']
+				}
+			}).on("data", function(log){
+				console.log(log)
+			});
+
+			DepositoContract.events.banevent({
+				fromBlock: 'latest'
+			}, (error, event) => {
+				if (error) {
+					console.error(error);
+				} else {
+					// Access the event data
+					console.log("notifica")
+					if(event.returnValues['target'] == String(Web3.utils.toChecksumAddress(window.ethereum.selectedAddress)))
+					{
+						msg = "Sei stato bannato da" + event.returnValues['sender']+ " , ora non puoi acquistare licenze per i suoi testi"
+					}
+					
+				}
+			}).on("data", function(log){
+				console.log(log)
+			});
+
+
+			DepositoContract.events.unbanevent({
+				fromBlock: 'latest'
+			}, (error, event) => {
+				if (error) {
+					console.error(error);
+				} else {
+					// Access the event data
+					console.log("notifica")
+					if(event.returnValues['target'] == String(Web3.utils.toChecksumAddress(window.ethereum.selectedAddress)))
+					{
+						msg = event.returnValues['sender'] + " ti ha sbloccato , ora puoi acquistare licenze per i suoi testi"
+					}
+					
 				}
 			}).on("data", function(log){
 				console.log(log)
 			});
 		
+
 		
 	   }).catch((error) => {
 		  console.log(error, error.code);
@@ -160,22 +256,6 @@
 	window.location.replace("http://127.0.0.1:8000/dirittocenet/logout");
   }
 
-  function selectmode(){
-	//questa funzione  cambia dalla modalità visualizzazione licenza a quella visualizzazione testi depositati e viceversa
-
-	const but = document.getElementById("mode")
-	document.getElementById("elenco").innerHTML = ""
-	document.getElementById("ricerca").value = ""
-	if(but.innerHTML == "visualizza le tue licenze")
-	{
-		but.innerHTML = "visualizza i testi depositati"
-		
-
-	}else{
-		but.innerHTML = "visualizza le tue licenze" 
-}
-search()
-}
 
 function openNav() {
 
@@ -339,32 +419,37 @@ async function search(){
 	const but = document.getElementById("mode")
 	const query = document.getElementById("ricerca").value
 	var xmlHttp = new XMLHttpRequest();
-	if(but.innerHTML == "visualizza le tue licenze")
-	{
-	link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=T"+"&p="+String(page)
-    xmlHttp.open( "GET", link,  false ); 
-	resp(xmlHttp)
-	listTesti()
 	
-	
-	}else{
-		link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=L"+"&p="+page
-		xmlHttp.open( "GET",link , false );
-		resp(xmlHttp)
-	}
+	switch(tipo.value){
+		case "a":
+			link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=T"+"&p="+String(page)
+			xmlHttp.open( "GET", link,  false ); 
+			resp(xmlHttp)
+			listTesti()
+			break
+		case "b":
+			link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=L"+"&p="+String(page)
+			xmlHttp.open( "GET",link , false );
+		    resp(xmlHttp)
+			break
+		case "c":
+			link = "http://127.0.0.1:8000/dirittocenet/search/?q="+  query + "&t=mT"+"&p="+String(page)
+			xmlHttp.open( "GET", link,  false ); 
+			resp(xmlHttp)
+			listTesti()
+			break
+		case "d":
+			link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=mL"+"&p="+String(page)
+			xmlHttp.open( "GET",link , false );
+		    resp(xmlHttp)
+			break
 
+	}
 }
 
 
 async function listTesti() {
 
-	/** 
-	var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q=&t=T", false ); 
-    xmlHttp.send( null );
-	document.getElementById("elenco").innerHTML = ""
-	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
-	**/
 
 	if (Disbtn != undefined){
 	Disbtn.forEach(function(but){
@@ -405,16 +490,6 @@ async function listTesti() {
 	})
 	  }
   
-async function listLicenze(){
-	/** 
-
-	var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/search/?q=&t=L", false ); 
-    xmlHttp.send( null );
-	document.getElementById("elenco").innerHTML = ""
-	document.getElementById("elenco").insertAdjacentHTML("afterbegin",xmlHttp.response)
-	*/
-    }
   
 function espandiRip(event){
 	//gli element di ciascuna card costituente il testo sono identificati tramite id composto da una nome che identifica
@@ -494,99 +569,158 @@ if (containerRip.classList.contains('expanded')){ containerRip.classList.remove(
 function buildTestocontract(){
      DepositoContract = new web3.eth.Contract(
 		[
-	{
-		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "prezzo",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "sender",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "token_id",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "titolo",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "data",
-				"type": "uint256"
-			}
-		],
-		"name": "Deposito",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "prezzo",
-				"type": "uint256"
-			}
-		],
-		"name": "cambioprezzoDeposito",
-		"type": "event"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "fallback"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "target",
-				"type": "address"
-			}
-		],
-		"name": "ban",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "id",
-				"type": "string"
-			}
-		],
-		"name": "idOfTesto",
-		"outputs": [
-			{
-				"components": [
+				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "prezzo",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "token_id",
+						"type": "string"
+					},
+					{
+						"indexed": false,
 						"internalType": "string",
 						"name": "titolo",
 						"type": "string"
 					},
 					{
+						"indexed": false,
 						"internalType": "uint256",
-						"name": "time",
+						"name": "data",
 						"type": "uint256"
+					}
+				],
+				"name": "Deposito",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "target",
+						"type": "address"
+					}
+				],
+				"name": "banevent",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "prezzo",
+						"type": "uint256"
+					}
+				],
+				"name": "cambioprezzoDeposito",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "target",
+						"type": "address"
+					}
+				],
+				"name": "unbanevent",
+				"type": "event"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "fallback"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "target",
+						"type": "address"
+					}
+				],
+				"name": "ban",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "id",
+						"type": "string"
+					}
+				],
+				"name": "idOfTesto",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "string",
+								"name": "titolo",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "time",
+								"type": "uint256"
+							},
+							{
+								"internalType": "string",
+								"name": "token_id",
+								"type": "string"
+							}
+						],
+						"internalType": "struct testo",
+						"name": "t",
+						"type": "tuple"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "titolo",
+						"type": "string"
 					},
 					{
 						"internalType": "string",
@@ -594,174 +728,153 @@ function buildTestocontract(){
 						"type": "string"
 					}
 				],
-				"internalType": "struct testo",
-				"name": "t",
-				"type": "tuple"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "titolo",
-				"type": "string"
+				"name": "mint",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
 			},
 			{
-				"internalType": "string",
-				"name": "token_id",
-				"type": "string"
-			}
-		],
-		"name": "mint",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "token",
-				"type": "string"
-			}
-		],
-		"name": "onwnerOf",
-		"outputs": [
-			{
-				"internalType": "address payable",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "prezzo",
-				"type": "uint256"
-			}
-		],
-		"name": "setprezzoDeposito",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"name": "testiOf",
-		"outputs": [
-			{
-				"components": [
+				"inputs": [
 					{
 						"internalType": "string",
-						"name": "titolo",
+						"name": "token",
 						"type": "string"
-					},
+					}
+				],
+				"name": "onwnerOf",
+				"outputs": [
+					{
+						"internalType": "address payable",
+						"name": "owner",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
 					{
 						"internalType": "uint256",
-						"name": "time",
+						"name": "prezzo",
 						"type": "uint256"
-					},
+					}
+				],
+				"name": "setprezzoDeposito",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					}
+				],
+				"name": "testiOf",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "string",
+								"name": "titolo",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "time",
+								"type": "uint256"
+							},
+							{
+								"internalType": "string",
+								"name": "token_id",
+								"type": "string"
+							}
+						],
+						"internalType": "struct testo[]",
+						"name": "testi",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "target",
+						"type": "address"
+					}
+				],
+				"name": "unban",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
 					{
 						"internalType": "string",
 						"name": "token_id",
 						"type": "string"
 					}
 				],
-				"internalType": "struct testo[]",
-				"name": "testi",
-				"type": "tuple[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "target",
-				"type": "address"
-			}
-		],
-		"name": "unban",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "token_id",
-				"type": "string"
-			}
-		],
-		"name": "validDeposito",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "validity",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "target",
-				"type": "address"
+				"name": "validDeposito",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "validity",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
 			},
 			{
-				"internalType": "address",
-				"name": "author",
-				"type": "address"
-			}
-		],
-		"name": "validUser",
-		"outputs": [
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "target",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "author",
+						"type": "address"
+					}
+				],
+				"name": "validUser",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "valid",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
 			{
-				"internalType": "bool",
-				"name": "valid",
-				"type": "bool"
+				"stateMutability": "payable",
+				"type": "receive"
 			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "receive"
-	}
-],Depositocontractaddress,{from: window.ethereum.selectedAddress})
+		],Depositocontractaddress,{from: window.ethereum.selectedAddress})
     }
 
 function buildLicenzacontract()
