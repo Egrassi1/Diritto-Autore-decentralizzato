@@ -79,6 +79,12 @@ background-color: beige;
 background-color: #bcf648f0;
 }
 
+.card.u {
+    background-color: orange;
+    width: 75%;
+    
+}
+
 .card:hover {
 box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 }

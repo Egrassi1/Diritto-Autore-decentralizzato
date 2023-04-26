@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 from dirittoautore.functions import match,handle_uploaded_file,gettoken
 from django.contrib.auth import login as Login, logout as Logout
 from dirittoautore.form import UploadFileForm
-from .models import Testo
+from .models import Testo , Bannedusers
 import eth_account
 import os
 from datetime import datetime
@@ -52,9 +52,6 @@ def search(request):
   le richieste sono dstinte dal campo t ,  t == T significa che l'utente ricerca un testo , t == L una licenza
   testi e licenze vengono recuperati leggendo gli eventi emessi sulla blockchain
   """
-
-
-
   if request.method == 'GET' :
         query= request.GET.get('q', None)
         tipo = request.GET.get('t', None)
@@ -150,7 +147,7 @@ def search(request):
                # In aggiunta viene controllato che l'utente da cui parte la richiesta 
                # sia il proprietario delle licenze.
                a = str(request.user)
-               b= str(proprietario).upper()
+               b= str(proprietario)
 
                if (a == b):
                   if(valori['tipo']):
@@ -200,7 +197,7 @@ def search(request):
                valori = valori[0].args 
                autore = valori["sender"]
         
-               if (a == str(autore).upper()):
+               if (a == str(autore)):
                     
                      
                     titolo =   valori["titolo"]
@@ -222,7 +219,7 @@ def search(request):
                     if(query == ""):
                         res =  render_to_string('cardTesto.html', context) +res
                     else:
-                        if(match(query,titolo)): res =  render_to_string('cardTesto.html', context) +resTit
+                        if(match(query,titolo)): res =  render_to_string('cardTesto.html', context) +res
            return HttpResponse(str(pages)+"."+res) 
 
         elif tipo == 'mL':
@@ -261,7 +258,7 @@ def search(request):
                id = valori["id"].hex()
 
                a = str(request.user)
-               b= str(autore).upper()
+               b= str(autore)
 
                if (a == b):
                   if(valori['tipo']):
@@ -292,6 +289,27 @@ def search(request):
               if(resTit != "") :resTit = "<p>per Titolo</p>"+ resTit
               if(resAut!= ""): resAut = "<p>per Id</p>"+ resAut  
               return HttpResponse(str(pages)+"."+resTit+resAut)
+            
+        elif tipo == 'u':
+        
+             b =  Bannedusers.objects.filter(sender = request.user)
+             leng = len(b)
+             pages = round(leng/2)
+             current = (int(pagina)-1)*2
+             for i in range(current, current+2):
+                 if(i >= leng) : break
+                 utente = b[i]
+                 context= {
+                     "id": utente.id,
+                     "utente": utente.target
+                 }
+                 if(query == ""):
+                    res = render_to_string('utente.html',context) +res
+                 else:
+                    if(match(query,utente.target)): res =  render_to_string('utente.html', context) +res
+             return HttpResponse(str(pages)+"."+res)
+
+        
 
 
 def download(request):
@@ -313,8 +331,8 @@ def download(request):
             aut = valori['autore']
            
             a = str(request.user)
-            b = str(prop).upper()
-            c = str(aut).upper()
+            b = str(prop)
+            c = str(aut)
         
             if (a == b or a == c):
 
@@ -341,9 +359,9 @@ def login(request):
     # calcola l'encoding del messaggio nello standard EIP-191
     address =  eth_account.Account.recover_message(message,signature = firma)
 
-    address = address.upper()
+    address = address
 
-    if (var.auth[address.upper()] == msg) : 
+    if (var.auth[address] == msg) : 
       # verifica se per l'utente che ha firmato era stato depositato nel dictionary un nonce corrispondende a quello ricevuto dalla richiesta
       var.auth[address] = None # il token è consumato
       
@@ -364,7 +382,7 @@ def login(request):
 def token(request): #viene gestita la richiesta del token
     query= request.GET.get('q', None)
     tok = gettoken()
-    query = query.upper()
+    query = query
     var.auth [query] = tok
     print(query)
     print(var.auth[query])
@@ -374,3 +392,37 @@ def logout(request):
     if request.user.is_authenticated:
         Logout(request)
         return redirect("index") # si viene reindirizzati alla pagina di login
+
+def ban(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+            Wbreceipt = body['tr']
+            event_filter = var.contrattoTesto.events.banevent.create_filter(fromBlock = 0, address = var.addressTesto ,argument_filters = {"sender":body['sender'], "target": body['target'] })
+            event_logs = event_filter.get_all_entries()
+            for e in event_logs:
+                tx_hash = e['transactionHash']
+                if(Wbreceipt == tx_hash.hex()):
+                    b = Bannedusers(sender = body['sender'],target = body['target'])
+                    b.save()
+                    break
+            return HttpResponse("success")
+        except:  return HttpResponse("server error")
+
+
+def unban(request):
+    if request.method == "POST":
+         try:
+            body = json.loads(request.body)
+            Wbreceipt = body['tr']            
+            event_filter = var.contrattoTesto.events.unbanevent.create_filter(fromBlock = 0, address = var.addressTesto ,argument_filters = {"sender":body['sender'], "target": body['target'] })
+            event_logs = event_filter.get_all_entries()
+            for e in event_logs:
+                    tx_hash = e['transactionHash']
+                    if(Wbreceipt == tx_hash.hex()):
+                        b =  Bannedusers.objects.filter(id= body['id'])
+                        print(b)
+                        b.delete()
+                        break
+            return HttpResponse("success")  
+         except:  return HttpResponse("server error")

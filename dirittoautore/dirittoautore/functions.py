@@ -16,7 +16,7 @@ def handle_uploaded_file(f):
 
     # viene effettuato un doppio controllo sulla transazione
     event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex()
-    event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, arguments = {"token_id": hash})
+    event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, argument_filters = {"token_id": hash})
     event_logs = event_filter.get_all_entries()
     e = event_logs[0]
     tx_hash = e['transactionHash']

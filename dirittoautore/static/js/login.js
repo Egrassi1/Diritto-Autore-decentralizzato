@@ -16,11 +16,12 @@ async function onload(){
 
 async function login(){
      //recupero nonce casuale da firmare
-     xhr = new XMLHttpRequest();
-	 xhr.open("GET", "http://127.0.0.1:8000/dirittocenet/token/?q="+window.ethereum.selectedAddress,false);
+  xhr = new XMLHttpRequest();
+	xhr.open("GET", "http://127.0.0.1:8000/dirittocenet/token/?q="+ Web3.utils.toChecksumAddress(window.ethereum.selectedAddress),false);
 
-    xhr.send(null)
+  xhr.send(null)
 	nonce = xhr.response
+
 	console.log(nonce)
 	//firma =  await window.ethereum.personal.sign(nonce,window.ethereum.selectedAddress)
 	firma = await ethereum.request({
@@ -28,11 +29,10 @@ async function login(){
         params: [nonce,window.ethereum.selectedAddress]
       }); 
 	xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://127.0.0.1:8000/dirittocenet/login/");
-    xhr.setRequestHeader("Accept", "application/json");
+  xhr.open("POST", "http://127.0.0.1:8000/dirittocenet/login/");
+  xhr.setRequestHeader("Accept", "application/json");
 	xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
-    xhr.setRequestHeader("Content-Type", "application/json");
-
+  xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function () {  //status 200 
   if (xhr.readyState === 4) {
     console.log(xhr.status);
