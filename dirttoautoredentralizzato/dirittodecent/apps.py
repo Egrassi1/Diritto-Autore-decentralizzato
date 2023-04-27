@@ -50,7 +50,7 @@ class DirittodecentConfig(AppConfig):
         if os.environ.get('RUN_MAIN'):
             print('Deploy dei contratti')
             install_solc('latest')
-            w3 = Web3(Web3.HTTPProvider('HTTP://127.0.0.1:7545'))
+            w3 = Web3(Web3.HTTPProvider('http://18.193.74.219:8545'))
             w3.eth.default_account = w3.eth.accounts[0] 
              #per il deploy dei contratti si utilizza un portafoglio, in questo caso uso il primo portafoglio di gananche
             DirittodecentConfig.contrattoTesto(w3)

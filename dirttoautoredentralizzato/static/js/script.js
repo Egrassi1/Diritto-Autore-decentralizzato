@@ -55,7 +55,6 @@
 	document.getElementById("search").addEventListener("click",search)
 	document.getElementById("btn_dep").addEventListener("click",deposita)
 	document.getElementById("ban").addEventListener("click",ban)
-	document.getElementById("unban").addEventListener("click",unban)
 	document.getElementById("logout").addEventListener("click",logout)
 	document.getElementById("pageup").addEventListener("click",pageup)
 	document.getElementById("pagedown").addEventListener("click",pagedown)
