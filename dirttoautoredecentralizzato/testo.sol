@@ -85,27 +85,55 @@ function validDeposito(string calldata token_id) public view returns(bool validi
 // fuznioni per bannare o sbannare portafogli
     function ban(address target) external{
       require(msg.sender != target, "non e' possibile bannare se stessi");
+      require(validban(target), "utente gia' bannato");
       banned[msg.sender].push(target);
       emit banevent(msg.sender, target);
     }
 
+    function validban(address target) internal view returns (bool valid){
+        for(uint i = 0; i < banned[msg.sender].length ; i++ )
+      {
+         if(banned[msg.sender][i] == target)
+        {
+          return false;
+        }
+      }
+      return true;
+    }
 
     function unban(address target) external{
 
-      for(uint i = 0; i < banned[msg.sender].length ; i++ )
+
+         require(validunban(target), "l'utente selezionato non e' attualmente bannato ") ;
+           for(uint i = 0; i < banned[msg.sender].length ; i++ )
       {
-        if(banned[msg.sender][i] == target)
+         if(banned[msg.sender][i] == target)
         {
+
           banned[msg.sender][i] = banned[msg.sender][ banned[msg.sender].length -1];
           banned[msg.sender].pop();
           emit unbanevent(msg.sender, target);
         }
       }
+        
+
+    
     }
 
 
+    function validunban(address target) internal view returns (bool valid){
+        for(uint i = 0; i < banned[msg.sender].length ; i++ )
+      {
+         if(banned[msg.sender][i] == target)
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
 // restituisce true se l'utente non è stato bannato dall'autore del testo 
-  function validUser(address target, address author)external returns (bool valid){
+  function validUser(address target, address author)external view returns (bool valid){
 
     for(uint i = 0 ; i < banned[author].length ; i++ ){
 

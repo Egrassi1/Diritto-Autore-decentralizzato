@@ -125,6 +125,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -135,3 +137,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #SECURE_SSL_REDIRECT = True
 #SESSION_COOKIE_SECURE = True
 #CSRF_COOKIE_SECURE = True
+
+
+# Content Security Policy
+
+CSP_IMG_SRC = ("'self'")
+
+CSP_STYLE_SRC = ("'self'", "https://maxcdn.bootstrapcdn.com/font-awesome/" , "https://fonts.googleapis.com/")
+
+CSP_FONT_SRC= ("'self'" , "https://fonts.gstatic.com/" ,"https://fonts.googleapis.com/" ,"https://maxcdn.bootstrapcdn.com/font-awesome/")
+
+CSP_SCRIPT_SRC = ("'self'", "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" , 
+                  "https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js" 
+                  ,"https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js")
+                  
+                  
+                  
+                  
+                  

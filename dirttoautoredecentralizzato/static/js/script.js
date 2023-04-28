@@ -1,7 +1,7 @@
 
+	const url = "http://127.0.0.1:8000"
 	open_menu =false;
-    var _event;
-
+  
     var DepositoContract;
     var Depositocontractaddress ;
 	var Licenzacontract;
@@ -79,7 +79,7 @@ function mode(){
 		web3 = new Web3(window.ethereum)
 		
 		var xmlHttp = new XMLHttpRequest();
-		xmlHttp.open( "GET", "http://127.0.0.1:8000/dirittocenet/script", false ); 
+		xmlHttp.open( "GET", url+"/dirittocenet/script", false ); 
 	   xmlHttp.send( null );
 		ad = xmlHttp.responseText
 	   Depositocontractaddress = ad.split(";")[0]
@@ -122,7 +122,7 @@ function mode(){
 
 
 				window.ethereum.on('accountsChanged', function (accounts) {
-					window.location.replace("http://127.0.0.1:8000/dirittocenet/logout");
+					window.location.replace(url+"/dirittocenet/logout");
 				})
 
 
@@ -139,25 +139,6 @@ function mode(){
 				});
 */
 
-
-			Licenzacontract.events.RilascioLicenza({
-				fromBlock: 'latest'
-			}, (error, event) => {
-				if (error) {
-					console.error(error);
-				} else {
-					// Access the event data
-					console.log("notifica")
-					if(String(event.returnValues['autore']).toUpperCase == String(window.ethereum.selectedAddress).toUpperCase)
-					{
-						
-					}
-					
-				}
-			}).on("data", function(log){
-				console.log(log)
-			});
-			
 
 			DepositoContract.events.cambioprezzoDeposito({
 				fromBlock: 'latest'
@@ -179,7 +160,6 @@ function mode(){
 					console.error(error);
 				} else {
 					// Access the event data
-					console.log("notifica")
 					cambioRip=event.returnValues['cambio']
 				}
 			}).on("data", function(log){
@@ -193,56 +173,15 @@ function mode(){
 					console.error(error);
 				} else {
 					// Access the event data
-					console.log("notifica")
 					cambioDis=event.returnValues['cambio']
 				}
 			}).on("data", function(log){
 				console.log(log)
 			});
-
-			DepositoContract.events.banevent({
-				fromBlock: 'latest'
-			}, (error, event) => {
-				if (error) {
-					console.error(error);
-				} else {
-					// Access the event data
-					console.log("notifica")
-					if(event.returnValues['target'] == String(Web3.utils.toChecksumAddress(window.ethereum.selectedAddress)))
-					{
-						msg = "Sei stato bannato da" + event.returnValues['sender']+ " , ora non puoi acquistare licenze per i suoi testi"
-					}
-					
-				}
-			}).on("data", function(log){
-				console.log(log)
-			});
-
-
-			DepositoContract.events.unbanevent({
-				fromBlock: 'latest'
-			}, (error, event) => {
-				if (error) {
-					console.error(error);
-				} else {
-					// Access the event data
-					console.log("notifica")
-					if(event.returnValues['target'] == String(Web3.utils.toChecksumAddress(window.ethereum.selectedAddress)))
-					{
-						msg = event.returnValues['sender'] + " ti ha sbloccato , ora puoi acquistare licenze per i suoi testi"
-					}
-					
-				}
-			}).on("data", function(log){
-				console.log(log)
-			});
-		
-
 		
 	   }).catch((error) => {
 		  console.log(error, error.code);
 	   })
-	  
 	 }
 	 else{
 	   console.log("errore , metamask non abilitato")
@@ -253,7 +192,7 @@ function mode(){
 	}
 
   function logout(){
-	window.location.replace("http://127.0.0.1:8000/dirittocenet/logout");
+	window.location.replace(url+"/dirittocenet/logout");
   }
 
 
@@ -374,32 +313,46 @@ async function mintLicenzaDistribuzione(event){
       }
 
 
+
 async function ban(){
 	target= document.getElementById("banuser").value
-	DepositoContract.methods.ban(target).send().on('receipt', function(receipt){
-	
-  xhr = new XMLHttpRequest();
-  xhr.open("POST", "http://127.0.0.1:8000/dirittocenet/ban/"); //???
-  xhr.setRequestHeader("Accept", "application/json");
-  xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
+	DepositoContract.methods.ban(target).estimateGas(function(error, estimatedGas) {
+		if(error){
+			error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
+					error= JSON.parse(error)
+					window.alert(error.data.reason)
+		}
+		else{
+			
+			    DepositoContract.methods.ban(target).send().on('receipt', function(receipt){
+	    
+				xhr = new XMLHttpRequest();
+				xhr.open("POST", url+"/dirittocenet/ban/"); //???
+				xhr.setRequestHeader("Accept", "application/json");
+				xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
+			  
+				xhr.setRequestHeader("Content-Type", "application/json");
+				  xhr.onreadystatechange = function () {  //status 200 
+				if (xhr.readyState === 4) {
+				  console.log(xhr.status);
+				  window.location.replace(url+"/dirittocenet");
+				}};
+				let data = { 
+				  "tr": receipt['transactionHash'],
+				  "sender": Web3.utils.toChecksumAddress(window.ethereum.selectedAddress),
+				  "target": target
+				  };
+			  xhr.send(JSON.stringify(data));
+			  window.location.replace(url+"/dirittocenet/")
+			  })
+				  .catch((error) => {
+						console.log(error, error.code);
+			  })
 
-  xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.onreadystatechange = function () {  //status 200 
-  if (xhr.readyState === 4) {
-    console.log(xhr.status);
-    window.location.replace("http://127.0.0.1:8000/dirittocenet");
-  }};
-  let data = { 
-	"tr": receipt['transactionHash'],
-	"sender": Web3.utils.toChecksumAddress(window.ethereum.selectedAddress),
-	"target": target
-	};
-xhr.send(JSON.stringify(data));
-window.location.replace("http://127.0.0.1:8000/dirittocenet/")
-})
-	.catch((error) => {
-		  console.log(error, error.code);
-})
+
+
+		}})
+	
 
 
 }
@@ -408,10 +361,19 @@ async function unban(event){
 	id = event.target.id 
 	target= document.getElementById("t"+id).innerText
 
-	DepositoContract.methods.unban(target).send().on('receipt', function(receipt){
+
+	DepositoContract.methods.unban(target).estimateGas(function(error, estimatedGas) {
+		if(error){
+			error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
+					error= JSON.parse(error)
+					window.alert(error.data.reason)
+		}
+		else{
+			
+			    DepositoContract.methods.unban(target).send().on('receipt', function(receipt){
 		
 		xhr = new XMLHttpRequest();
-		xhr.open("POST", "http://127.0.0.1:8000/dirittocenet/unban/"); 
+		xhr.open("POST", url+"/dirittocenet/unban/"); 
 		xhr.setRequestHeader("Accept", "application/json");
 		xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
 	  
@@ -419,7 +381,7 @@ async function unban(event){
 		  xhr.onreadystatechange = function () {  //status 200 
 		if (xhr.readyState === 4) {
 		  console.log(xhr.status);
-		  window.location.replace("http://127.0.0.1:8000/dirittocenet");
+		  window.location.replace(url+"/dirittocenet");
 		}};
 						  
 		
@@ -430,13 +392,19 @@ async function unban(event){
 			"id": id
 			};
 	  xhr.send(JSON.stringify(data));
-	  window.location.replace("http://127.0.0.1:8000/dirittocenet/")
+	  window.location.replace(url+"/dirittocenet/")
 	})
 
 	.catch((error) => {
 		  console.log(error, error.code);
 	   })
+	}
+
+
+})
+
 }
+
 
 function listusers(){
 	if (Usbtn != undefined)
@@ -484,29 +452,29 @@ async function search(){
 	
 	switch(tipo.value){
 		case "a":
-			link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=T"+"&p="+String(page)
+			link = url+"/dirittocenet/search/?q="+ query + "&t=T"+"&p="+String(page)
 			xmlHttp.open( "GET", link,  false ); 
 			resp(xmlHttp)
 			listTesti()
 			break
 		case "b":
-			link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=L"+"&p="+String(page)
+			link = url+"/dirittocenet/search/?q="+ query + "&t=L"+"&p="+String(page)
 			xmlHttp.open( "GET",link , false );
 		    resp(xmlHttp)
 			break
 		case "c":
-			link = "http://127.0.0.1:8000/dirittocenet/search/?q="+  query + "&t=mT"+"&p="+String(page)
+			link = url+"/dirittocenet/search/?q="+  query + "&t=mT"+"&p="+String(page)
 			xmlHttp.open( "GET", link,  false ); 
 			resp(xmlHttp)
 			listTesti()
 			break
 		case "d":
-			link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=mL"+"&p="+String(page)
+			link = url+"/dirittocenet/search/?q="+ query + "&t=mL"+"&p="+String(page)
 			xmlHttp.open( "GET",link , false );
 		    resp(xmlHttp)
 			break
 		case "e":
-			link = "http://127.0.0.1:8000/dirittocenet/search/?q="+ query + "&t=u"+"&p="+String(page)
+			link = url+"/dirittocenet/search/?q="+ query + "&t=u"+"&p="+String(page)
 			xmlHttp.open( "GET",link , false );
 		    resp(xmlHttp)
 			listusers()

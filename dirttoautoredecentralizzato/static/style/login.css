@@ -3,6 +3,10 @@ body {
     background-color: #F0F8FF;
 
 }
+img{
+    text-align: center;
+    transform: translateX(-7.5%);
+}
 
 .login-form {
     width: 300px;

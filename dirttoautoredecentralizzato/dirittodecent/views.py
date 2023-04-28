@@ -8,11 +8,9 @@ from .models import Testo , Bannedusers
 import eth_account
 import os
 from datetime import datetime
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 import dirittoautore.var as var
 from django.contrib.auth.models import User
-
-import math
 
 
 
@@ -23,9 +21,9 @@ def index(request):
       e poi viene ricaricata la pagina perché è necessario rigenerare il token csrf
       Se l'utente non è autenticato viene caricato il template login.html
    """
-   if (request.user == 'eugenio'):
-       logout(request)
-
+   if (request.user.is_superuser):
+       Logout(request)
+       return render(request,'login.html')
    if request.user.is_authenticated:  
       print(request.user)
       file = UploadFileForm()
@@ -308,7 +306,7 @@ def search(request):
                  else:
                     if(match(query,utente.target)): res =  render_to_string('utente.html', context) +res
              return HttpResponse(str(pages)+"."+res)
-
+        raise Http404
         
 
 
@@ -391,7 +389,8 @@ def token(request): #viene gestita la richiesta del token
 def logout(request):
     if request.user.is_authenticated:
         Logout(request)
-        return redirect("index") # si viene reindirizzati alla pagina di login
+        # si viene reindirizzati alla pagina di login
+    return redirect("index")
 
 def ban(request):
     if request.method == "POST":
