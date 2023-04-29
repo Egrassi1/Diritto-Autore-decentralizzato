@@ -1,5 +1,5 @@
 
-	const url = "http://127.0.0.1:8000"
+	const url = "http://13.53.192.147"
 	open_menu =false;
   
     var DepositoContract;
