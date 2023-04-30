@@ -22,6 +22,7 @@ from django.urls import path
 
 urlpatterns = [
     path('', lambda request: redirect('dirittodecent/', permanent=True)),
+    path('dirittocenet', lambda request: redirect('dirittodecent/', permanent=True)),
     path("dirittodecent/", include("dirittodecent.urls")),
     path('admin/', admin.site.urls)
 ]

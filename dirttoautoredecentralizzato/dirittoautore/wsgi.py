@@ -23,7 +23,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dirittoautore.settings')
 
 print('Deploy dei contratti')
 install_solc('latest')
-w3 = Web3(Web3.HTTPProvider('http://3.120.237.204:8545'))
+w3 = Web3(Web3.HTTPProvider('http://18.184.8.150:8545'))
 w3.eth.default_account = w3.eth.accounts[0] 
 #per il deploy dei contratti si utilizza un portafoglio, in questo caso uso il primo portafoglio di gananche
 DirittodecentConfig.contrattoTesto(w3)

@@ -48,6 +48,7 @@ class DirittodecentConfig(AppConfig):
          
     def ready(self):
         if os.environ.get('RUN_MAIN'):
+            '''''
             print('Deploy dei contratti')
             install_solc('latest')
             w3 = Web3(Web3.HTTPProvider('http://18.193.74.219:8545'))
@@ -56,6 +57,7 @@ class DirittodecentConfig(AppConfig):
             DirittodecentConfig.contrattoTesto(w3)
             DirittodecentConfig.ContrattoLicenza(w3)
             var.web3 =w3
+            '''''
             # viene salvato un riferimento al provider web3
             
 

@@ -1,4 +1,5 @@
 import json
+import math
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from dirittoautore.functions import match,handle_uploaded_file,gettoken
@@ -35,7 +36,7 @@ def index(request):
       else:
             form = UploadFileForm(request.POST,request.FILES)
             handle_uploaded_file(request.FILES['file'])  
-            return redirect("http://13.53.192.147/dirittodecent/")
+            return redirect("http://16.16.124.198/dirittodecent/")
    else:
        return render(request,'login.html')
    
@@ -66,10 +67,12 @@ def search(request):
            event_logs = event_filter.get_all_entries()
 
            leng = len(event_logs)
-           pages = round(leng/5)
-           current = (int(pagina)-1)*5
+           pages = leng/4
+           if  math.floor(pages) < (pages) : pages = pages +1
+           pages = int(pages)
+           current = (int(pagina)-1)*4
         
-           for i in range(current, current+5):
+           for i in range(current, current+4):
                if(i >= leng) : break
 
                e = event_logs[i]
@@ -125,11 +128,13 @@ def search(request):
             event_logs = event_filter.get_all_entries()
 
             leng = len(event_logs)
-            pages = round(leng/5)
-            current = (int(pagina)-1)*5
-        
+            pages = leng/4
+            if  math.floor(pages) < (pages) : pages = pages +1
+            pages = int(pages)
+            current = (int(pagina)-1)*4
+            
 
-            for i in range(current, current+5):
+            for i in range(current, current+4):
                if(i >= leng) : break
 
                e = event_logs[i]
@@ -165,7 +170,7 @@ def search(request):
                    "time": data,
                    "data": desc,
                    "id": id,
-                   "link": 'http://13.53.192.147/dirittodecent/download/?q='+id # viene aggiunto al template il link per il download del testo
+                   "link": 'http://16.16.124.198//dirittodecent/download/?q='+id # viene aggiunto al template il link per il download del testo
                }
                   
                   if(query == ""):
@@ -183,10 +188,15 @@ def search(request):
            event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex() # viene calcolata la firma dell'evento
            event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressTesto, 'topics': [event_signature_hash]})
            event_logs = event_filter.get_all_entries()
+
            leng = len(event_logs)
-           pages = round(leng/5)
-           current = (int(pagina)-1)*5       
-           for i in range(current, current+5):
+           pages = leng/4
+           if  math.floor(pages) < (pages) : pages = pages +1
+           pages = int(pages)
+           current = (int(pagina)-1)*4    
+
+
+           for i in range(current, current+4):
                if(i >= leng) : break
 
                e = event_logs[i]
@@ -240,11 +250,13 @@ def search(request):
             event_logs = event_filter.get_all_entries()
 
             leng = len(event_logs)
-            pages = round(leng/5)
-            current = (int(pagina)-1)*5
+            pages = leng/4
+            if  math.floor(pages) < (pages) : pages = pages +1
+            pages = int(pages)
+            current = (int(pagina)-1)*4    
         
 
-            for i in range(current, current+5):
+            for i in range(current, current+4):
                if(i >= leng) : break
 
                e = event_logs[i]
@@ -278,7 +290,7 @@ def search(request):
                    "time": data,
                    "data": desc,
                    "id": id,
-                   "link": 'http://127.0.0.1:8000/dirittodecent/download/?q='+id
+                   "link": 'http://16.16.124.198/dirittodecent/download/?q='+id
                   
                
                }
@@ -297,8 +309,10 @@ def search(request):
         
              b =  Bannedusers.objects.filter(sender = request.user)
              leng = len(b)
-             pages = round(leng/5)
-             current = (int(pagina)-1)*5
+             pages = leng/4
+             if  math.floor(pages) < (pages) : pages = pages +1
+             pages = int(pages)
+             current = (int(pagina)-1)*4
              for i in range(current, current+5):
                  if(i >= leng) : break
                  utente = b[i]

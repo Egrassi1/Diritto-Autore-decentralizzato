@@ -1,5 +1,5 @@
 
-	const url = "http://13.53.192.147"
+	const url = "http://16.16.124.198/"
 	open_menu =false;
   
     var DepositoContract;
