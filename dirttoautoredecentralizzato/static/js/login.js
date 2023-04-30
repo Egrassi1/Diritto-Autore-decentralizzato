@@ -17,7 +17,7 @@ async function onload(){
 async function login(){
      //recupero nonce casuale da firmare
   xhr = new XMLHttpRequest();
-	xhr.open("GET", url+"/dirittocenet/token/?q="+ Web3.utils.toChecksumAddress(window.ethereum.selectedAddress),false);
+	xhr.open("GET", url+"/dirittodecent/token/?q="+ Web3.utils.toChecksumAddress(window.ethereum.selectedAddress),false);
 
   xhr.send(null)
 	nonce = xhr.response
@@ -29,7 +29,7 @@ async function login(){
         params: [nonce,window.ethereum.selectedAddress]
       }); 
 	xhr = new XMLHttpRequest();
-  xhr.open("POST", url+"/dirittocenet/login/");
+  xhr.open("POST", url+"/dirittodecent/login/");
   xhr.setRequestHeader("Accept", "application/json");
 	xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
   xhr.setRequestHeader("Content-Type", "application/json");

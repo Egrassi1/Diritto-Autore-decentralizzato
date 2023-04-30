@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import include, path
 
 """dirittoautore URL Configuration
@@ -20,6 +21,7 @@ from django.contrib import admin
 from django.urls import path
 
 urlpatterns = [
-    path("dirittocenet/", include("dirittodecent.urls")),
+    path('', lambda request: redirect('dirittodecent/', permanent=True)),
+    path("dirittodecent/", include("dirittodecent.urls")),
     path('admin/', admin.site.urls)
 ]

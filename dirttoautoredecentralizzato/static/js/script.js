@@ -79,7 +79,7 @@ function mode(){
 		web3 = new Web3(window.ethereum)
 		
 		var xmlHttp = new XMLHttpRequest();
-		xmlHttp.open( "GET", url+"/dirittocenet/script", false ); 
+		xmlHttp.open( "GET", url+"/dirittodecent/script", false ); 
 	   xmlHttp.send( null );
 		ad = xmlHttp.responseText
 	   Depositocontractaddress = ad.split(";")[0]
@@ -122,7 +122,7 @@ function mode(){
 
 
 				window.ethereum.on('accountsChanged', function (accounts) {
-					window.location.replace(url+"/dirittocenet/logout");
+					window.location.replace(url+"/dirittodecent/logout");
 				})
 
 
@@ -192,7 +192,7 @@ function mode(){
 	}
 
   function logout(){
-	window.location.replace(url+"/dirittocenet/logout");
+	window.location.replace(url+"/dirittodecent/logout");
   }
 
 
@@ -240,7 +240,8 @@ function openNav() {
 				}else{
 			const trans = DepositoContract.methods.mint(titolo , id).send({"value": web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt){
 			//una volta effettuata la transazione il file viene caricato sul backend
-			$("#post-form").submit()			
+			$("#post-form").submit()	
+
           })
 		  
 			}
@@ -327,7 +328,7 @@ async function ban(){
 			    DepositoContract.methods.ban(target).send().on('receipt', function(receipt){
 	    
 				xhr = new XMLHttpRequest();
-				xhr.open("POST", url+"/dirittocenet/ban/"); //???
+				xhr.open("POST", url+"/dirittodecent/ban/"); //???
 				xhr.setRequestHeader("Accept", "application/json");
 				xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
 			  
@@ -335,7 +336,7 @@ async function ban(){
 				  xhr.onreadystatechange = function () {  //status 200 
 				if (xhr.readyState === 4) {
 				  console.log(xhr.status);
-				  window.location.replace(url+"/dirittocenet");
+				  window.location.replace(url+"/dirittodecent");
 				}};
 				let data = { 
 				  "tr": receipt['transactionHash'],
@@ -343,7 +344,7 @@ async function ban(){
 				  "target": target
 				  };
 			  xhr.send(JSON.stringify(data));
-			  window.location.replace(url+"/dirittocenet/")
+			  window.location.replace(url+"/dirittodecent/")
 			  })
 				  .catch((error) => {
 						console.log(error, error.code);
@@ -373,7 +374,7 @@ async function unban(event){
 			    DepositoContract.methods.unban(target).send().on('receipt', function(receipt){
 		
 		xhr = new XMLHttpRequest();
-		xhr.open("POST", url+"/dirittocenet/unban/"); 
+		xhr.open("POST", url+"/dirittodecent/unban/"); 
 		xhr.setRequestHeader("Accept", "application/json");
 		xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
 	  
@@ -381,7 +382,7 @@ async function unban(event){
 		  xhr.onreadystatechange = function () {  //status 200 
 		if (xhr.readyState === 4) {
 		  console.log(xhr.status);
-		  window.location.replace(url+"/dirittocenet");
+		  window.location.replace(url+"/dirittodecent");
 		}};
 						  
 		
@@ -392,7 +393,7 @@ async function unban(event){
 			"id": id
 			};
 	  xhr.send(JSON.stringify(data));
-	  window.location.replace(url+"/dirittocenet/")
+	  window.location.replace(url+"/dirittodecent/")
 	})
 
 	.catch((error) => {
@@ -452,29 +453,29 @@ async function search(){
 	
 	switch(tipo.value){
 		case "a":
-			link = url+"/dirittocenet/search/?q="+ query + "&t=T"+"&p="+String(page)
+			link = url+"/dirittodecent/search/?q="+ query + "&t=T"+"&p="+String(page)
 			xmlHttp.open( "GET", link,  false ); 
 			resp(xmlHttp)
 			listTesti()
 			break
 		case "b":
-			link = url+"/dirittocenet/search/?q="+ query + "&t=L"+"&p="+String(page)
+			link = url+"/dirittodecent/search/?q="+ query + "&t=L"+"&p="+String(page)
 			xmlHttp.open( "GET",link , false );
 		    resp(xmlHttp)
 			break
 		case "c":
-			link = url+"/dirittocenet/search/?q="+  query + "&t=mT"+"&p="+String(page)
+			link = url+"/dirittodecent/search/?q="+  query + "&t=mT"+"&p="+String(page)
 			xmlHttp.open( "GET", link,  false ); 
 			resp(xmlHttp)
 			listTesti()
 			break
 		case "d":
-			link = url+"/dirittocenet/search/?q="+ query + "&t=mL"+"&p="+String(page)
+			link = url+"/dirittodecent/search/?q="+ query + "&t=mL"+"&p="+String(page)
 			xmlHttp.open( "GET",link , false );
 		    resp(xmlHttp)
 			break
 		case "e":
-			link = url+"/dirittocenet/search/?q="+ query + "&t=u"+"&p="+String(page)
+			link = url+"/dirittodecent/search/?q="+ query + "&t=u"+"&p="+String(page)
 			xmlHttp.open( "GET",link , false );
 		    resp(xmlHttp)
 			listusers()

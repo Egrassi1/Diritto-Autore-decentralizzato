@@ -35,7 +35,7 @@ def index(request):
       else:
             form = UploadFileForm(request.POST,request.FILES)
             handle_uploaded_file(request.FILES['file'])  
-            return render(request , 'index.html',context)
+            return redirect("http://13.53.192.147/dirittodecent/")
    else:
        return render(request,'login.html')
    
@@ -86,9 +86,10 @@ def search(request):
                #per determinare il livello di trust bisogna interrogare il database mySQL
                try:
                     trust = Testo.objects.get(id= id).trust
-                    if (trust): trust = "Testo Verificato"
-                    elif(not trust) : trust = "Testo Segnalato come non autentico "
-                    else : trust = "Testo in attesa di verifica"
+                    if trust is None : trust = "Testo in attesa di verifica"
+                    elif (trust): trust = "Testo Verificato"
+                    else : trust = "Testo Segnalato come non autentico "
+                
                except: trust = "Testo Segnalato come non autentico "
 
                context = {"titolo" : titolo,
@@ -164,7 +165,7 @@ def search(request):
                    "time": data,
                    "data": desc,
                    "id": id,
-                   "link": 'http://13.53.192.147/dirittocenet/download/?q='+id # viene aggiunto al template il link per il download del testo
+                   "link": 'http://13.53.192.147/dirittodecent/download/?q='+id # viene aggiunto al template il link per il download del testo
                }
                   
                   if(query == ""):
@@ -277,7 +278,7 @@ def search(request):
                    "time": data,
                    "data": desc,
                    "id": id,
-                   "link": 'http://127.0.0.1:8000/dirittocenet/download/?q='+id
+                   "link": 'http://127.0.0.1:8000/dirittodecent/download/?q='+id
                   
                
                }
