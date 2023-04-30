@@ -24,7 +24,7 @@ class DirittodecentConfig(AppConfig):
          w3.eth.default_account = w3.eth.accounts[0]
          var.contrattoTesto = w3.eth.contract(abi=abi, bytecode=bytecode)
          #il costruttore viene inizializzato con un costo in WEI per il deposito dei testi
-         tx_hash = var.contrattoTesto.constructor(1000000).transact()  
+         tx_hash = var.contrattoTesto.constructor(200000000000000000).transact()  
          tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
          addressTesto = tx_receipt.contractAddress
          print(addressTesto)
@@ -39,7 +39,7 @@ class DirittodecentConfig(AppConfig):
         abi = interface_licenza['abi'] 
         var.contrattoLicenza = w3.eth.contract(abi=abi, bytecode=bytecode)
          #il costruttore viene inizializzato con un costo base in WEI per le licenze (questo salirà proporzionalmente alle copie o alla scadenza)
-        tx_hash = var.contrattoLicenza.constructor(var.addressTesto,10000,10000).transact()
+        tx_hash = var.contrattoLicenza.constructor(var.addressTesto,1000000,1000000).transact()
         tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
         print(tx_receipt.contractAddress)
         var.addressLicenza = str(tx_receipt.contractAddress)

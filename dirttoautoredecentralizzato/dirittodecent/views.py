@@ -66,10 +66,10 @@ def search(request):
            event_logs = event_filter.get_all_entries()
 
            leng = len(event_logs)
-           pages = round(leng/2)
-           current = (int(pagina)-1)*2
+           pages = round(leng/5)
+           current = (int(pagina)-1)*5
         
-           for i in range(current, current+2):
+           for i in range(current, current+5):
                if(i >= leng) : break
 
                e = event_logs[i]
@@ -84,10 +84,12 @@ def search(request):
                data = datetime.utcfromtimestamp(valori["data"]).strftime('%Y-%m-%d %H:%M:%S')
 
                #per determinare il livello di trust bisogna interrogare il database mySQL
-               trust = Testo.objects.get(id= id).trust
-               if (trust): trust = "Testo Verificato"
-               elif(not trust) : trust = "Testo Segnalato come non autentico "
-               else : trust = "Testo in attesa di verifica"
+               try:
+                    trust = Testo.objects.get(id= id).trust
+                    if (trust): trust = "Testo Verificato"
+                    elif(not trust) : trust = "Testo Segnalato come non autentico "
+                    else : trust = "Testo in attesa di verifica"
+               except: trust = "Testo Segnalato come non autentico "
 
                context = {"titolo" : titolo,
                  "id": id,
@@ -122,11 +124,11 @@ def search(request):
             event_logs = event_filter.get_all_entries()
 
             leng = len(event_logs)
-            pages = round(leng/2)
-            current = (int(pagina)-1)*2
+            pages = round(leng/5)
+            current = (int(pagina)-1)*5
         
 
-            for i in range(current, current+2):
+            for i in range(current, current+5):
                if(i >= leng) : break
 
                e = event_logs[i]
@@ -162,7 +164,7 @@ def search(request):
                    "time": data,
                    "data": desc,
                    "id": id,
-                   "link": 'http://127.0.0.1:8000/dirittocenet/download/?q='+id # viene aggiunto al template il link per il download del testo
+                   "link": 'http://13.53.192.147/dirittocenet/download/?q='+id # viene aggiunto al template il link per il download del testo
                }
                   
                   if(query == ""):
@@ -181,9 +183,9 @@ def search(request):
            event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressTesto, 'topics': [event_signature_hash]})
            event_logs = event_filter.get_all_entries()
            leng = len(event_logs)
-           pages = round(leng/2)
-           current = (int(pagina)-1)*2       
-           for i in range(current, current+2):
+           pages = round(leng/5)
+           current = (int(pagina)-1)*5       
+           for i in range(current, current+5):
                if(i >= leng) : break
 
                e = event_logs[i]
@@ -204,10 +206,12 @@ def search(request):
                     data = datetime.utcfromtimestamp(valori["data"]).strftime('%Y-%m-%d %H:%M:%S')
 
                     
-                    trust = Testo.objects.get(id= id).trust
-                    if (trust): trust = "Testo Verificato"
-                    elif(not trust) : trust = "Testo Segnalato come non autentico "
-                    else : trust = "Testo in attesa di verifica"
+                    try:
+                        trust = Testo.objects.get(id= id).trust
+                        if (trust): trust = "Testo Verificato"
+                        elif(not trust) : trust = "Testo Segnalato come non autentico "
+                        else : trust = "Testo in attesa di verifica"
+                    except: trust = "Testo Segnalato come non autentico "
 
                     context = {"titolo" : titolo,
                         "id": id,
@@ -235,11 +239,11 @@ def search(request):
             event_logs = event_filter.get_all_entries()
 
             leng = len(event_logs)
-            pages = round(leng/2)
-            current = (int(pagina)-1)*2
+            pages = round(leng/5)
+            current = (int(pagina)-1)*5
         
 
-            for i in range(current, current+2):
+            for i in range(current, current+5):
                if(i >= leng) : break
 
                e = event_logs[i]
@@ -292,9 +296,9 @@ def search(request):
         
              b =  Bannedusers.objects.filter(sender = request.user)
              leng = len(b)
-             pages = round(leng/2)
-             current = (int(pagina)-1)*2
-             for i in range(current, current+2):
+             pages = round(leng/5)
+             current = (int(pagina)-1)*5
+             for i in range(current, current+5):
                  if(i >= leng) : break
                  utente = b[i]
                  context= {

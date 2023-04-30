@@ -36,7 +36,7 @@ async function login(){
     xhr.onreadystatechange = function () {  //status 200 
   if (xhr.readyState === 4) {
     console.log(xhr.status);
-    window.location.replace(url+"dirittocenet");
+    window.location.replace(url+"/dirittocenet");
   }};
 
 //il json inviato al backend consta della firma e del messaggio originale(nonce). Il backend controlla che il messaggio sia stato firmato 
