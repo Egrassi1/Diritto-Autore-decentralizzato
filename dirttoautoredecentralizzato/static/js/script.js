@@ -1,5 +1,5 @@
 
-	const url = "http://16.16.124.198/"
+	const url = "http://16.16.124.198"
 	open_menu =false;
   
     var DepositoContract;
@@ -144,47 +144,47 @@ function mode(){
 				fromBlock: 'latest'
 			}, (error, event) => {
 				if (error) {
-					console.error(error);
+					//console.error(error);
 				} else {
-					// Access the event data				
+			
 					cambioprezzoDeposito= event.returnValues['prezzo']					
 				}
 			}).on("data", function(log){
-				console.log(log)
+				//console.log(log)
 			});
 
 			Licenzacontract.events.changeCambioRip({
 				fromBlock: 'latest'
 			}, (error, event) => {
 				if (error) {
-					console.error(error);
+					//console.error(error);
 				} else {
-					// Access the event data
+
 					cambioRip=event.returnValues['cambio']
 				}
 			}).on("data", function(log){
-				console.log(log)
+				//console.log(log)
 			});
 
 			Licenzacontract.events.changeCambioDis({
 				fromBlock: 'latest'
 			}, (error, event) => {
 				if (error) {
-					console.error(error);
+					//console.error(error);
 				} else {
-					// Access the event data
+
 					cambioDis=event.returnValues['cambio']
 				}
 			}).on("data", function(log){
-				console.log(log)
+				//console.log(log)
 			});
 		
 	   }).catch((error) => {
-		  console.log(error, error.code);
+		  //console.log(error, error.code);
 	   })
 	 }
 	 else{
-	   console.log("errore , metamask non abilitato")
+	  // console.log("errore , metamask non abilitato")
 	 }
 
 
@@ -223,7 +223,7 @@ function openNav() {
           const binaryString = event.target.result;
           const md5 = CryptoJS.MD5(CryptoJS.enc.Latin1.parse(binaryString)).toString(CryptoJS.enc.Hex);
           id = md5 
-          console.log(id)
+          //console.log(id)
           var titolo = document.getElementById("ftitolo").value
 
 
@@ -270,10 +270,7 @@ async function mintLicenzaRiproduzione(event)
           today.setHours(0,0,0)
           start = Math.floor(today.getTime() / 1000)
           var scadenza =Math.floor( new Date(expire.value).getTime()/1000)
-          console.log("start: "+ start)
-          console.log("expire: "+ scadenza)
           var value = (scadenza - start) * cambioRip
-          console.log(value)
           value = web3.utils.BN(value)
 
 		  Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).estimateGas({"value": web3.utils.toWei(value,"wei")},
@@ -297,7 +294,7 @@ async function mintLicenzaDistribuzione(event){
 		  num = document.getElementById('Dnum'+id).value
       
           value = (cambioDis*num) 
-          console.log(value)
+
 
 		  Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).estimateGas({"value": web3.utils.toWei(value.toString(),"wei")},
 			function(error, estimatedGas) {
@@ -317,8 +314,11 @@ async function mintLicenzaDistribuzione(event){
 
 async function ban(){
 	target= document.getElementById("banuser").value
-	DepositoContract.methods.ban(target).estimateGas(function(error, estimatedGas) {
+	
+
+	 DepositoContract.methods.ban(target).estimateGas(function(error, estimatedGas) {
 		if(error){
+			
 			error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
 					error= JSON.parse(error)
 					window.alert(error.data.reason)
@@ -335,7 +335,6 @@ async function ban(){
 				xhr.setRequestHeader("Content-Type", "application/json");
 				  xhr.onreadystatechange = function () {  //status 200 
 				if (xhr.readyState === 4) {
-				  console.log(xhr.status);
 				  window.location.replace(url+"/dirittodecent");
 				}};
 				let data = { 
@@ -346,17 +345,18 @@ async function ban(){
 			  xhr.send(JSON.stringify(data));
 			  window.location.replace(url+"/dirittodecent/")
 			  })
-				  .catch((error) => {
-						console.log(error, error.code);
-			  })
-
+		
+			  	
 
 
 		}})
+
 	
 
 
 }
+
+	
 
 async function unban(event){
 	id = event.target.id 
@@ -381,7 +381,7 @@ async function unban(event){
 		xhr.setRequestHeader("Content-Type", "application/json");
 		  xhr.onreadystatechange = function () {  //status 200 
 		if (xhr.readyState === 4) {
-		  console.log(xhr.status);
+		
 		  window.location.replace(url+"/dirittodecent");
 		}};
 						  
@@ -397,7 +397,7 @@ async function unban(event){
 	})
 
 	.catch((error) => {
-		  console.log(error, error.code);
+	
 	   })
 	}
 
@@ -427,12 +427,12 @@ async function search(){
 
 	var resp =(xmlHttp) =>{
 		xmlHttp.send( null );
-		console.log(xmlHttp.response)
+	
 		document.getElementById("elenco").innerHTML = ""
 	
 	
 		response = xmlHttp.response
-		console.log(response)
+
 		ind = response.indexOf(".")
 	
 		pagemax = response.slice(0,ind)
@@ -556,7 +556,7 @@ if (containerDis.classList.contains('expanded')){ containerDis.classList.remove(
 var today = new Date();
 today.setHours(0,0,0)
 start = today.getTime() / 1000
-console.log(start)
+
 var scadenza = new Date(dateInput.value).getTime()/1000
 var value = Math.floor(scadenza - start) * cambioRip
 
