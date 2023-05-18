@@ -16,7 +16,7 @@ class DirittodecentConfig(AppConfig):
     name = 'dirittodecent'
 
     def contrattoTesto(w3):
-       
+        
          contract_testo = compile_files(['testo.sol'],output_values=["abi", "bin"])
          id_testo, interface_testo = contract_testo.popitem()
          bytecode = interface_testo['bin'] 
@@ -32,6 +32,7 @@ class DirittodecentConfig(AppConfig):
          #l'indirizzo del contratto viene salvato nel modulo var, verra poi passato ai template
     
     def ContrattoLicenza(w3):
+       
         contract_licenza = compile_files(['licenza.sol'],output_values=["abi", "bin"])
         id_licenza ,interface_licenza = contract_licenza.popitem()
         id_licenza ,interface_licenza = contract_licenza.popitem()
@@ -51,7 +52,7 @@ class DirittodecentConfig(AppConfig):
             '''''
             print('Deploy dei contratti')
             install_solc('latest')
-            w3 = Web3(Web3.HTTPProvider('http://18.193.74.219:8545'))
+            w3 = Web3(Web3.HTTPProvider('http://18.193.74.219:7545'))
             w3.eth.default_account = w3.eth.accounts[0] 
              #per il deploy dei contratti si utilizza un portafoglio, in questo caso uso il primo portafoglio di gananche
             DirittodecentConfig.contrattoTesto(w3)

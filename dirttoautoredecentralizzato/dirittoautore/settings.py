@@ -150,6 +150,9 @@ CSP_FONT_SRC= ("'self'" , "https://fonts.gstatic.com/" ,"https://fonts.googleapi
 CSP_SCRIPT_SRC = ("'self'", "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" , 
                   "https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js" 
                   ,"https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js")
+
+
+USE_TZ = True
                   
                   
                   

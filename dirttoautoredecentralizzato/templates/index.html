@@ -28,7 +28,9 @@
 
 	 https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js
 	 https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js 
-	 https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js;"
+	 https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js;
+     connect-src https://16.16.124.198
+     127.0.0.1:8000;"
    >
 	<title>Diritto d'autore decentralizzato</title>
 </head>
@@ -73,15 +75,17 @@
         {% csrf_token %}  
         {{ form.as_p }}  
     </form>
-    <button id="btn_dep">deposita </button> <br> <br>
+    <button id="btn_dep">deposita </button> <br>
+    <p class = "red" id ="erdep"></p> <br><br>
 
 
 
 	<p>Banna un utente dall'acquistare le licenze per i tuoi testi:</p>
 	<input type="text" id="banuser" name="ftitolo" value="..."><br><br>
-	<button id = "ban" >banna</button> <br><br><br>
+	<button id = "ban" >banna</button> <br>
+    <p class = "red" id ="erban"></p> <br><br><br>
 
-	<div class = "right"><button id = "logout">logout</button> </div>
+	<div class = "right" ><button id = "logout">logout</button> </div>
 </div>
 </div>
 

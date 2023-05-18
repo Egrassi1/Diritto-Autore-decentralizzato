@@ -1,6 +1,10 @@
 
-	const url = "http://16.16.124.198"
+	const url = "http://127.0.0.1:8000"
 	open_menu =false;
+	const erdep = document.getElementById("erdep")
+	const erban = document.getElementById("erban")
+	const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
+    document.cookie = "timezone=" + timezone;
   
     var DepositoContract;
     var Depositocontractaddress ;
@@ -35,10 +39,13 @@
 		{
 			document.getElementById("pageup").disabled = true
 		}
+	
+		
 		search()
 	}
 
 	function pagedown(){
+		
 		page = page-1
 
 		if (document.getElementById("pageup").disabled == true) document.getElementById("pageup").disabled = false
@@ -47,12 +54,14 @@
 		{
 			document.getElementById("pagedown").disabled = true
 		}
+
+	
 		search()
 	}
 
 	window.addEventListener("load",connetti)
 	document.getElementById("menubutton").addEventListener("click",openNav)
-	document.getElementById("search").addEventListener("click",search)
+	document.getElementById("search").addEventListener("click",searchBtn)
 	document.getElementById("btn_dep").addEventListener("click",deposita)
 	document.getElementById("ban").addEventListener("click",ban)
 	document.getElementById("logout").addEventListener("click",logout)
@@ -64,12 +73,15 @@
 
 function mode(){
 
-	document.getElementById("elenco").innerHTML = ""
+	//document.getElementById("elenco").innerHTML = ""
+	document.getElementById("elenco").innerHTML = "Ricerca in corso"
 	document.getElementById("ricerca").value = ""
 	page = 1
 	document.getElementById("pagedown").disabled = true
 	document.getElementById("pageup").disabled = false
 	search()
+	
+	
 
 }
 
@@ -96,7 +108,8 @@ function mode(){
 
 
 			 buildTestocontract()
-			 buildLicenzacontract()          
+			 buildLicenzacontract() 
+
 			  search()
 
 			  DepositoContract.getPastEvents("cambioprezzoDeposito",{
@@ -216,7 +229,7 @@ function openNav() {
         const file = document.getElementById("filefield").files[0];
         //console.log(file);
         var id ;
-
+		erdep.innerHTML =""
         const reader = new FileReader();
 		 // viene calcolato hash md del file selezionato per definire l'id corretto
           reader.onload = (event) => {
@@ -235,7 +248,8 @@ function openNav() {
 					
 					error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
 					error= JSON.parse(error)
-					window.alert(error.data.reason)
+					//window.alert(error.data.reason)
+					erdep.innerHTML = error.data.reason
 					
 				}else{
 			const trans = DepositoContract.methods.mint(titolo , id).send({"value": web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt){
@@ -264,6 +278,8 @@ async function mintLicenzaRiproduzione(event)
 			id = event.target.id 
 			causale = document.getElementById('Rcau'+id).value
 			expire = document.getElementById('Rdat'+id).value
+			err = document.getElementById('Errip'+id)
+			err.innerHTML = ""
           //calcolo del costo
           expire = document.getElementById("Rdat"+id)
           var today = new Date();
@@ -276,13 +292,31 @@ async function mintLicenzaRiproduzione(event)
 		  Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).estimateGas({"value": web3.utils.toWei(value,"wei")},
 			function(error, estimatedGas) {
 				if(error){
-					
+					console.log(error)
 					error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
 					error= JSON.parse(error)
-					window.alert(error.data.reason)
+					err.innerHTML =error.data.reason
+					//window.alert(error.data.reason)
 					
 				}else{
-          Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).send({"value":web3.utils.toWei(value, "wei")})
+          Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).send({"value":web3.utils.toWei(value, "wei")}).on('receipt', function(receipt){
+			//una volta effettuata la transazione il file viene caricato sul backend
+			xhr = new XMLHttpRequest();
+  			xhr.open("POST", url+"/dirittodecent/licenza/");
+  			xhr.setRequestHeader("Accept", "application/json");
+			xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
+  			xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function () {  //status 200 
+  if (xhr.readyState === 4) {
+    window.location.replace(url+"/dirittodecent");
+  }};
+
+let data = { 
+"tx": receipt.transactionHash
+};
+xhr.send(JSON.stringify(data));
+
+          })
 				}
 			 })
       }
@@ -292,7 +326,8 @@ async function mintLicenzaDistribuzione(event){
 		  id = event.target.id 
 		  causale = document.getElementById('Dcau'+id).value
 		  num = document.getElementById('Dnum'+id).value
-      
+		  err = document.getElementById('Erdis'+id)
+		  err.innerHTML = ""
           value = (cambioDis*num) 
 
 
@@ -302,10 +337,26 @@ async function mintLicenzaDistribuzione(event){
 					
 					error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
 					error= JSON.parse(error)
-					window.alert(error.data.reason)
-					
+					//window.alert(error.data.reason)
+					err.innerHTML = error.data.reason
 				}else{
-          Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).send({"value" : web3.utils.toWei(value.toString(), "wei") })
+          Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).send({"value" : web3.utils.toWei(value.toString(), "wei") }).on('receipt', function(receipt){
+			//una volta effettuata la transazione il file viene caricato sul backend
+			xhr = new XMLHttpRequest();
+  			xhr.open("POST", url+"/dirittodecent/licenza/");
+  			xhr.setRequestHeader("Accept", "application/json");
+			xhr.setRequestHeader("X-CSRFTOKEN", document.querySelector('[name=csrfmiddlewaretoken]').value)
+  			xhr.setRequestHeader("Content-Type", "application/json");
+    		xhr.onreadystatechange = function () {  //status 200 
+ 			 if (xhr.readyState === 4) {
+   			 window.location.replace(url+"/dirittodecent");
+ 			 }};
+let data = { 
+"tx": receipt.transactionHash
+};
+xhr.send(JSON.stringify(data));
+
+          })
 				}})
   
       }
@@ -314,14 +365,15 @@ async function mintLicenzaDistribuzione(event){
 
 async function ban(){
 	target= document.getElementById("banuser").value
-	
+	erban.innerHTML = ""
 
 	 DepositoContract.methods.ban(target).estimateGas(function(error, estimatedGas) {
 		if(error){
 			
 			error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
 					error= JSON.parse(error)
-					window.alert(error.data.reason)
+					//window.alert(error.data.reason)
+					erban.innerHTML = error.data.reason
 		}
 		else{
 			
@@ -421,23 +473,24 @@ function listusers(){
 	})
 
 }
+async function searchBtn(){
+page = 1
+search()
 
+}
 async function search(){
-
-
 	var resp =(xmlHttp) =>{
+		
 		xmlHttp.send( null );
-	
-		document.getElementById("elenco").innerHTML = ""
-	
-	
+		
 		response = xmlHttp.response
 
 		ind = response.indexOf(".")
 	
 		pagemax = response.slice(0,ind)
 		res= response.slice(ind+1)
-		document.getElementById("elenco").insertAdjacentHTML("afterbegin",res)
+		document.getElementById("elenco").innerHTML = res
+		//document.getElementById("elenco").insertAdjacentHTML("afterbegin",res)
 		if (pagemax > 1){
 			document.getElementById("pages").classList.add("v")
 		}else{
@@ -446,11 +499,12 @@ async function search(){
 		document.getElementById("pgindex").innerText= String(page)+ " di "+ String(pagemax)
 
 	}
-
+	
 	const but = document.getElementById("mode")
 	const query = document.getElementById("ricerca").value
-	var xmlHttp = new XMLHttpRequest();
-	
+
+	var xmlHttp = new XMLHttpRequest(); 
+
 	switch(tipo.value){
 		case "a":
 			link = url+"/dirittodecent/search/?q="+ query + "&t=T"+"&p="+String(page)
@@ -480,7 +534,6 @@ async function search(){
 		    resp(xmlHttp)
 			listusers()
 			break
-
 	}
 }
 

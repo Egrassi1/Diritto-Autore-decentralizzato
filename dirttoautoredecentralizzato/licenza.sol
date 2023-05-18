@@ -69,6 +69,7 @@ function mintLicenzaRiproduzione(string memory token_id, string memory causale, 
   transfer(dt.onwnerOf(token_id), value/2);
 }
 
+
 function mintLicenzaDistribuzione(string memory token_id, string memory causale, uint copie) payable external
 {
  testo memory t = dt.idOfTesto(token_id);
@@ -80,7 +81,7 @@ function mintLicenzaDistribuzione(string memory token_id, string memory causale,
  
  uint timestamp = block.timestamp;
  bytes20 _id = bytes20(keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1))));
- Licenza memory _licenza = Licenza(_id,t,causale,TipoLicenza.RIPRODUZIONE,timestamp,0,0,copie);
+ Licenza memory _licenza = Licenza(_id,t,causale,TipoLicenza.DISTRIBUZIONE,timestamp,0,0,copie);
 
  addressToLicenza[msg.sender].push( _licenza) ;
 
@@ -98,7 +99,7 @@ function validLicenzaRiproduzione(address buyer , uint expire,testo memory t) in
     {
     testo memory t1 = addressToLicenza[buyer][i].t;
    
-    if(keccak256(abi.encodePacked(t1.token_id)) ==keccak256(abi.encodePacked(t.token_id)) && addressToLicenza[buyer][i].expire <= expire )
+    if((keccak256(abi.encodePacked(t1.token_id)) ==keccak256(abi.encodePacked(t.token_id))) && addressToLicenza[buyer][i].expire >= expire )
     {
       return false;
     }

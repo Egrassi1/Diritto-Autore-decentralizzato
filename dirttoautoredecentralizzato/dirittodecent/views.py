@@ -1,20 +1,28 @@
+import hashlib
 import json
 import math
+import threading
+import time
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from dirittoautore.functions import match,handle_uploaded_file,gettoken
 from django.contrib.auth import login as Login, logout as Logout
 from dirittoautore.form import UploadFileForm
-from .models import Testo , Bannedusers
+from dirittodecent.trust import trust
+from .models import Testo , Bannedusers, Licenza
 import eth_account
 import os
 from datetime import datetime
 from django.http import Http404, HttpResponse
 import dirittoautore.var as var
 from django.contrib.auth.models import User
+import pytz
 
 
-url = "http://16.16.124.198"
+from django.core.files import File
+
+
+url = "http://127.0.0.1:8000"
 
 def index(request):
    """ Se l'utente è autenticato:
@@ -27,7 +35,6 @@ def index(request):
        Logout(request)
        return render(request,'login.html')
    if request.user.is_authenticated:  
-      print(request.user)
       file = UploadFileForm()
       context = {"Testoaddress" : var.addressTesto,
                  "LicenzaAddress": var.addressLicenza,
@@ -52,230 +59,146 @@ def search(request):
   le richieste sono dstinte dal campo t ,  t == T significa che l'utente ricerca un testo , t == L una licenza
   testi e licenze vengono recuperati leggendo gli eventi emessi sulla blockchain
   """
+  #starttime = time.time()
   if request.method == 'GET' :
+        
+        timezone = request.COOKIES.get("timezone")
+        try : timezone= pytz.timezone(timezone) 
+        except: timezone= None
+
         query= request.GET.get('q', None)
         tipo = request.GET.get('t', None)
         pagina = request.GET.get('p', None)
         res = "" 
-
         if tipo == 'T':
-          
-
-           event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex() # viene calcolata la firma dell'evento
-           event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressTesto, 'topics': [event_signature_hash]})
-          # si costruisce un event filter per l'evento specifico del relativo contratto e si leggono tutte le transazioni dal blocco 0
-           event_logs = event_filter.get_all_entries()
-           leng = len(event_logs)          
-           current = int(pagina)
-        
-           count = 0
-           #for i in range(current, current+4):
-           for e in event_logs:
-               #if(i >= leng) : break
-               #e = event_logs[i]
-               tx_hash = e['transactionHash']
-               receipt = var.web3.eth.get_transaction_receipt(tx_hash)
-               valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
-               #legge i log della transazione coerentemente con l'istanza del contratto
-               valori = valori[0].args  #dictionary dei valori emessi dall'evento
-               titolo =   valori["titolo"]
-               autore = valori["sender"]
-               if(query== "" or match(query,titolo) or match(query,autore)):
-                   count = count+1
-                   if (((current-1)*4)< count and count<= (current*4)):
-                        id = valori["token_id"]
-                        data = datetime.utcfromtimestamp(valori["data"]).strftime('%Y-%m-%d %H:%M:%S')
-                        try:
-                            trust = Testo.objects.get(id= id).trust
-                            if trust is None : trust = "Testo in attesa di verifica"
-                            elif (trust): trust = "Testo Verificato"
-                            else : trust = "Testo Segnalato come non autentico "
-                        except: trust = "Testo Segnalato come non autentico "
-               #per determinare il livello di trust bisogna interrogare il database mySQL
-                        context = {"titolo" : titolo,
-                        "id": id,
-                        "autore":autore ,
-                        "data":data,
-                        "trust": trust}
-                        res =  render_to_string('cardTesto.html', context) +res
-           pages = count / 4
-           if  math.floor(pages) < (pages) : pages = pages +1
-           pages = int(pages)
-           return HttpResponse(str(pages)+"."+res)
-      
-        elif tipo == 'L': 
-
-            tipolog =""
-            propietario = ""
-            autore = ""
-            titolo = ""
-            data = ""
-            desc = ""
-            id = ""
-            event_signature_hash = var.web3.keccak(text="RilascioLicenza(bool,address,address,string,string,uint256,bytes20,uint256)").hex()
-            event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressLicenza, 'topics': [event_signature_hash]})
-            event_logs = event_filter.get_all_entries()
-            current = int(pagina)
-            leng = len(event_logs)
-            
-            count = 0
-            for e in event_logs:
-               tx_hash = e['transactionHash']
-               receipt = var.web3.eth.get_transaction_receipt(tx_hash)
-               valori = var.contrattoLicenza.events.RilascioLicenza().process_receipt(receipt)
-               valori = valori[0].args  
-
-               proprietario = valori['proprietario']
-
-               autore =valori['autore']
-               titolo = valori['testo']
-               id = valori["id"].hex()
-               
-               # il funzionamento è analogo a quello descritto per i testi.
-               # In aggiunta viene controllato che l'utente da cui parte la richiesta 
-               # sia il proprietario delle licenze.
-               a = str(request.user)
-               b= str(proprietario)
-               if (a == b):
-                  if(query == "" or match(query,titolo) or match(query,id)):
-                     count= count+1
-                     if (((current-1)*4)< count and count<= (current*4)):
-                        data = datetime.utcfromtimestamp(valori["time"]).strftime('%Y-%m-%d %H:%M:%S')
-                        desc = valori['dati']
-                        if(valori['tipo']):
-                                tipolog = "Licenza di Riproduzione"
-                                desc = "Scadenza : " + datetime.utcfromtimestamp(desc).strftime('%Y-%m-%d %H:%M:%S')
-                        else:
-                            tipolog ="Licenza di Distribuzione"
-                            desc = "Copie da Distribuire :" + str(desc)
-                        context = {
-                        "tipo": tipolog,
-                        "proprietario": proprietario,
-                        "autore": autore,
-                        "titolo": titolo,
-                        "time": data,
-                        "data": desc,
-                        "id": id,
-                        "link": url+'/dirittodecent/download/?q='+id # viene aggiunto al template il link per il download del testo
-                        }
-                        res =  render_to_string('cardLicenza.html', context) +res    
-                        
-            pages = count / 4
+            if (query== ""):
+               qs =  Testo.objects.all()
+            else:
+                q1= Testo.objects.filter(titolo__startswith = query)
+                q2= Testo.objects.filter(sender__startswith = query)
+                qs = q2.union(q1)
+                   
+            leng = len(qs)
+            pages = leng/4
             if  math.floor(pages) < (pages) : pages = pages +1
             pages = int(pages)
+            current = (int(pagina)-1)*4
+            for i in range(current, current+4):
+                    if(i >= leng) : break
+                    t = qs[i]
+                    data = datetime.fromtimestamp(t.data,timezone).strftime('%Y-%m-%d %H:%M:%S')
+                    try:
+                                    if t.trust is None : trust = "Testo in attesa di verifica"
+                                    elif (t.trust): trust = "Testo Verificato"
+                                    else : trust = "Testo Segnalato come non autentico "
+                    except: trust = "Testo Segnalato come non autentico "
+                    context = {"titolo" : t.titolo,
+                                    "id": t.id,
+                                    "autore":t.sender ,
+                                    "data":data,
+                                    "trust": trust}
+                    res =  render_to_string('cardTesto.html', context) +res
             return HttpResponse(str(pages)+"."+res)
-
+        
+        elif tipo == 'L':
+            if (query== ""):
+               qs =  Licenza.objects.filter(proprietario= str(request.user))
+            else:
+                q1= Licenza.objects.filter(proprietario = str(request.user),titolo__startswith = query)
+                q2= Licenza.objects.filter(proprietario = str(request.user),autore__startswith = query)
+                qs = q1.union(q2)
+            leng = len(qs)
+            pages = leng/4
+            if  math.floor(pages) < (pages) : pages = pages +1
+            pages = int(pages)
+            current = (int(pagina)-1)*4
+            for i in range(current, current+4):
+                if(i >= leng) : break
+                t = qs[i]
+                if(t.tipo):
+                            tipolog = "Licenza di Riproduzione"
+                            desc = "Scadenza : " + datetime.utcfromtimestamp(t.data).strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                            tipolog ="Licenza di Distribuzione"
+                            desc = "Copie da Distribuire :" + str(t.data)
+                context = {
+                                "tipo": tipolog,
+                                "proprietario": t.proprietario,
+                                "autore": t.autore,
+                                "titolo": t.titolo,
+                                "time": datetime.fromtimestamp(t.time,timezone).strftime('%Y-%m-%d %H:%M:%S'),
+                                "data": desc,
+                                "id": t.id,
+                                "link": url+'/dirittodecent/download/?q='+t.id # viene aggiunto al template il link per il download del testo
+                                }
+                res =  render_to_string('cardLicenza.html', context) +res
+            return HttpResponse(str(pages)+"."+res)
         elif tipo == 'mT':
-            
-           event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex() # viene calcolata la firma dell'evento
-           event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressTesto, 'topics': [event_signature_hash]})
-          # si costruisce un event filter per l'evento specifico del relativo contratto e si leggono tutte le transazioni dal blocco 0
-           event_logs = event_filter.get_all_entries()
+             if (query== ""):
+               qs =  Testo.objects.filter(sender = str(request.user))
+             else:
+                q1= Testo.objects.filter(sender = "request.user",titolo__startswith = query)
+                q2= Testo.objects.filter(sender = "request.user",sender__startswith = query)
+                qs = q2.union(q1)
+                   
+             leng = len(qs)
+             pages = leng/4
+             if  math.floor(pages) < (pages) : pages = pages +1
+             pages = int(pages)
+             current = (int(pagina)-1)*4
+             for i in range(current, current+4):
+                    if(i >= leng) : break
+                    t = qs[i]
+                    data = datetime.fromtimestamp(t.data,timezone).strftime('%Y-%m-%d %H:%M:%S')
 
-           leng = len(event_logs)
-           
-           current = int(pagina)
-        
-           count = 0
-           #for i in range(current, current+4):
-           for e in event_logs:
-               #if(i >= leng) : break
-               #e = event_logs[i]
-               tx_hash = e['transactionHash']
-               receipt = var.web3.eth.get_transaction_receipt(tx_hash)
-               valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
-               #legge i log della transazione coerentemente con l'istanza del contratto
-               valori = valori[0].args  #dictionary dei valori emessi dall'evento
-               titolo =   valori["titolo"]
-               autore = valori["sender"]
-               a = str(request.user)
-               if (a == str(autore)):
-                if(query== "" or match(query,titolo)):
-                    count = count+1
-                    if (((current-1)*4)< count and count<= (current*4)):
-                            id = valori["token_id"]
-                            data = datetime.utcfromtimestamp(valori["data"]).strftime('%Y-%m-%d %H:%M:%S')
-                            try:
-                                trust = Testo.objects.get(id= id).trust
-                                if trust is None : trust = "Testo in attesa di verifica"
-                                elif (trust): trust = "Testo Verificato"
-                                else : trust = "Testo Segnalato come non autentico "
-                            except: trust = "Testo Segnalato come non autentico "
-                #per determinare il livello di trust bisogna interrogare il database mySQL
-                            context = {"titolo" : titolo,
-                            "id": id,
-                            "autore":autore ,
-                            "data":data,
-                            "trust": trust}
-                            res =  render_to_string('cardTesto.html', context) +res
-           pages = count / 4
-           if  math.floor(pages) < (pages) : pages = pages +1
-           pages = int(pages)
-           return HttpResponse(str(pages)+"."+res)
-
+                    try:
+                                    
+                                    if t.trust is None : trust = "Testo in attesa di verifica"
+                                    elif (t.trust): trust = "Testo Verificato"
+                                    else : trust = "Testo Segnalato come non autentico "
+                    except: trust = "Testo Segnalato come non autentico "
+                    context = {"titolo" : t.titolo,
+                                    "id": t.id,
+                                    "autore":t.sender ,
+                                    "data":data,
+                                    "trust": trust}
+                    res =  render_to_string('cardTesto.html', context) +res
+             return HttpResponse(str(pages)+"."+res)
         elif tipo == 'mL':
-                      
-            tipolog =""
-            propietario = ""
-            autore = ""
-            titolo = ""
-            data = ""
-            desc = ""
-            id = ""
-            event_signature_hash = var.web3.keccak(text="RilascioLicenza(bool,address,address,string,string,uint256,bytes20,uint256)").hex()
-            event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressLicenza, 'topics': [event_signature_hash]})
-            event_logs = event_filter.get_all_entries()
-            current = int(pagina)
-            leng = len(event_logs)
-           
-            count = 0
-           #for i in range(current, current+4):
-            for e in event_logs:
-               tx_hash = e['transactionHash']
-               receipt = var.web3.eth.get_transaction_receipt(tx_hash)
-               valori = var.contrattoLicenza.events.RilascioLicenza().process_receipt(receipt)
-               valori = valori[0].args  
-               proprietario = valori['proprietario']
-               autore =valori['autore']
-               titolo = valori['testo']
-               id = valori["id"].hex()
-               
-               # il funzionamento è analogo a quello descritto per i testi.
-               # In aggiunta viene controllato che l'utente da cui parte la richiesta 
-               # sia il proprietario delle licenze.
-               a = str(request.user)
-               b= str(autore)
-               if (a == b):
-                  if(query == "" or match(query,titolo) or match(query,id)):
-                    count= count+1
-                    if (((current-1)*4)< count and count<= (current*4)):
-                        data = datetime.utcfromtimestamp(valori["time"]).strftime('%Y-%m-%d %H:%M:%S')
-                        desc = valori['dati']
-                        if(valori['tipo']):
-                                tipolog = "Licenza di Riproduzione"
-                                desc = "Scadenza : " + datetime.utcfromtimestamp(desc).strftime('%Y-%m-%d %H:%M:%S')
-                        else:
+             if (query== ""):
+               qs =  Licenza.objects.filter(autore = str(request.user))
+             else:
+                q1= Licenza.objects.filter(autore = str(request.user),titolo__startswith = query)
+                q2= Licenza.objects.filter(autore = str(request.user),autore__startswith = query)
+                qs = q1.union(q2)
+             leng = len(qs)
+             pages = leng/4
+             if  math.floor(pages) < (pages) : pages = pages +1
+             pages = int(pages)
+             current = (int(pagina)-1)*4
+             for i in range(current, current+4):
+                if(i >= leng) : break
+                t = qs[i]
+                if(t.tipo):
+                            tipolog = "Licenza di Riproduzione"
+                            desc = "Scadenza : " + datetime.utcfromtimestamp(t.data).strftime('%Y-%m-%d %H:%M:%S')
+                else:
                             tipolog ="Licenza di Distribuzione"
-                            desc = "Copie da Distribuire :" + str(desc)
-                        context = {
-                        "tipo": tipolog,
-                        "proprietario": proprietario,
-                        "autore": autore,
-                        "titolo": titolo,
-                        "time": data,
-                        "data": desc,
-                        "id": id,
-                        "link": url+'/dirittodecent/download/?q='+id # viene aggiunto al template il link per il download del testo
-                    }
-                        res =  render_to_string('cardLicenza.html', context) +res    
-            pages = count / 4
-            if  math.floor(pages) < (pages) : pages = pages +1
-            pages = int(pages)
-            return HttpResponse(str(pages)+"."+res)
-            
-        elif tipo == 'u':
-        
-            
+                            desc = "Copie da Distribuire :" + str(t.data)
+                context = {
+                                "tipo": tipolog,
+                                "proprietario": t.proprietario,
+                                "autore": t.autore,
+                                "titolo": t.titolo,
+                                "time": datetime.fromtimestamp(t.time,timezone).strftime('%Y-%m-%d %H:%M:%S'),
+                                "data": desc,
+                                "id": t.id,
+                                "link": url+'/dirittodecent/download/?q='+t.id # viene aggiunto al template il link per il download del testo
+                                }
+                res =  render_to_string('cardLicenza.html', context) +res
+             return HttpResponse(str(pages)+"."+res)
+
+        elif tipo == 'u':    
              b =  Bannedusers.objects.filter(sender = request.user, target__icontains = query)
              leng = len(b)
              pages = leng/4
@@ -291,9 +214,19 @@ def search(request):
                 
                  res = render_to_string('utente.html',context) +res
              return HttpResponse(str(pages)+"."+res)
-        
-        
-        raise Http404
+
+def licenza(request):
+    if (request.method == "POST"):
+        body = json.loads(request.body)
+        tx = body['tx']
+        trans = var.web3.eth.get_transaction_receipt(tx) #autentica la transazione
+        if trans is not None:
+            valori = var.contrattoLicenza.events.RilascioLicenza().process_receipt(trans)
+            valori = valori[0].args
+            l = Licenza(valori['id'].hex(), valori['proprietario'],valori['tipo'],valori['autore'],valori['testo'],valori['dati'], valori['time'])
+            l.save()
+        return HttpResponse("ok")
+
         
 
 
@@ -303,13 +236,12 @@ def download(request):
     event_signature_hash = var.web3.keccak(text="RilascioLicenza(bool,address,address,string,string,uint256,bytes20,uint256)").hex()
     event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressLicenza, 'topics': [event_signature_hash]})
     event_logs = event_filter.get_all_entries()
-    print(event_logs)
+  
     for e in event_logs:
         tx_hash = e['transactionHash']
         receipt = var.web3.eth.get_transaction_receipt(tx_hash)
         valori = var.contrattoLicenza.events.RilascioLicenza().process_receipt(receipt)
         valori = valori[0].args
-        print(valori)
         id = valori['id'].hex()
         if(id == query):
             prop = valori['proprietario']
@@ -335,7 +267,6 @@ def download(request):
 def login(request):
     
     body = json.loads(request.body)
-    print(body)
     firma = body['firma']
     msg = body['msg']
 
@@ -369,8 +300,6 @@ def token(request): #viene gestita la richiesta del token
     tok = gettoken()
     query = query
     var.auth [query] = tok
-    print(query)
-    print(var.auth[query])
     return HttpResponse(tok)
 
 def logout(request):
@@ -407,8 +336,8 @@ def unban(request):
                     tx_hash = e['transactionHash']
                     if(Wbreceipt == tx_hash.hex()):
                         b =  Bannedusers.objects.filter(id= body['id'])
-                        print(b)
                         b.delete()
                         break
             return HttpResponse("success")  
          except:  return HttpResponse("server error")
+

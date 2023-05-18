@@ -25,7 +25,10 @@ button:hover {
     background-color: #6B8E23;
 }
 
+.red{
 
+    color: red;
+}
 .sidenav {
 height: 100%;
 width: 0;

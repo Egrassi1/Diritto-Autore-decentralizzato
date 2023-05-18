@@ -1,4 +1,4 @@
-const url = "http://16.16.124.198"
+const url = "http://127.0.0.1:8000"
 window.addEventListener("load",onload)
 document.getElementById("login").addEventListener("click",login)
 
@@ -12,7 +12,6 @@ async function onload(){
      }else{window.alert("Devi avere Metamask installato sul tuo browser per poter usare questo servizio");}
 
 }
-
 
 async function login(){
      //recupero nonce casuale da firmare

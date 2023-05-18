@@ -10,12 +10,12 @@ def trust():
         semtrust.acquire()
         trust = True
         t = trustitems.pop()
-        tfile = open(t.file.name, encoding="utf8")
+        tfile = open(t.file.name, encoding="UTF-8")
         tdata = tfile.read()
         print("inizio comparazione: " + t.id)
-        comparelist = Testo.objects.filter().exclude(id =t.id)
+        comparelist = Testo.objects.filter.exclude(trust = False)
         for c in comparelist:
-            cfile =open(c.file.name)
+            cfile =open(c.file.name,encoding="UTF-8")
             cdata= cfile.read()
             rateo=  SequenceMatcher(None, tdata,cdata).ratio() * 100
             if (rateo >25):
@@ -25,6 +25,8 @@ def trust():
         print("fine comparazione: "+ t.id + " il trust è "+ str(trust))
     except: 
        print("si è verificato un errore nell'analisi del trust")
+       t.trust = False
+       t.save()
        traceback.print_exc()
         
 

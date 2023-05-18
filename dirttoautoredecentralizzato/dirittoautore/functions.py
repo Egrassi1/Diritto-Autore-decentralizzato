@@ -8,15 +8,15 @@ import dirittoautore.var as var
 import threading
 from dirittodecent.trust import trust
 
-def handle_uploaded_file(f):  
+def handle_uploaded_file(f, hash = 0):  
     # viene calcolato analogamente al front-end l'hash del file appena caricato
 
         bytes = f.read() 
         hash = hashlib.md5(bytes).hexdigest()
         print(hash)
-
+        
         # viene effettuato un doppio controllo sulla transazione
-        event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex()
+        #event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex()
         event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, argument_filters = {"token_id": hash})
         event_logs = event_filter.get_all_entries()
         e = event_logs[0]
@@ -26,14 +26,13 @@ def handle_uploaded_file(f):
         valori = valori[0].args 
         token_id = valori["token_id"]
 
-        if(token_id == hash):
-            t = Testo(hash,f,None)
+        if(token_id == hash):         
+            t = Testo(hash,f,None,valori['titolo'],str(valori['sender']),int(valori['data']))
             # se il thread non è stato inizializzato , viene costruito e avviato
             if var.truster == None:
                 var.truster = threading.Thread(target=trust)
                 var.truster.start()
             filename, ext = os.path.splitext(t.file.name)
-            print(ext)
             # se il testo  ha un formato valido , viene inserito nella coda per il controllo
             # altrimenti viene automaticamente segnalato come falso 
             if ext == ".txt":

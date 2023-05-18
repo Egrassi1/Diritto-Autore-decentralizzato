@@ -3,7 +3,9 @@
     <h3><a>{{titolo}}</a><div class = "right">{{trust}}</div></h3>
     <p>id : {{id}} </p>
     <p>autore :{{autore}} </p>
-    <p>data di deposito: {{data}}</p> <br>
+    <p>data di deposito:
+        {{ data }}
+    </p> <br>
     <p>Acquista:
         <button class="lic-btn D" id ="{{id}}">licenza distribuzione</button>
         <button class="lic-btn R" id="{{id}}">licenza riproduzione</button></p>
@@ -16,6 +18,7 @@
     <p>Causale:</p>
     <textarea id="Rcau{{id}}" rows="4" cols="50"></textarea> 
     <p><button class = "rip" id = "{{id}}">conferma e acquista</button>    
+        <p class = "red" id = "Errip{{id}}"></p>
     <div class="right" id ="Rcos{{id}}">costo: 0 WEI</div></p>  
 </div>
 
@@ -25,6 +28,7 @@
     <p>Causale:</p>
     <textarea id='Dcau{{id}}' rows="4" cols="50"></textarea>  
 <p><button class = "dis" id = "{{id}}">conferma e acquista</button> 
+    <p class = "red" id = "Erdis{{id}}"></p>
     <div class="right" id ="Dcos{{id}}">costo: 0 WEI</div></p> 
 </div>
 </div><br>
