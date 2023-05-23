@@ -6,10 +6,7 @@ pragma solidity ^0.8.17;
         string titolo;
         uint time; 
         string token_id;
-        //uri della risorsa
     }
-
-
 
 contract DepositoTesti{
 
@@ -19,7 +16,7 @@ contract DepositoTesti{
 
   mapping(string => testo) idToTesto;  //testo depositato per id
 
-  mapping(string => address) idToAutore;
+  mapping(string => address) idToAutore; //id del testo per autore
 
   mapping(address => address[]) banned ; // portafogli bannati dall'autore
 
@@ -45,19 +42,15 @@ modifier ownerOnly(){
 }
 
   // funzione di deposito di un testo
-        function mint(string calldata titolo , string calldata token_id) payable external  {
+function mint(string calldata titolo , string calldata token_id) payable external  {
             require(validDeposito(token_id), "Un testo con lo stesso id e' gia' stato depositato");
             require(msg.value == prezzoDeposito, "Ether non sufficienti a effettuare la transazione"); // prezzo per il deposito del testo
             testo  memory t = testo(titolo,block.timestamp ,token_id);
-
             TestiPosseduti[msg.sender].push(t);
             idToAutore[token_id] = msg.sender;
             idToTesto[token_id] = t;
-           
             totalsupply = totalsupply+1;
-
             emit Deposito(msg.sender, t.token_id,t.titolo,t.time);
-    
         }
 
 // controlla se il file da depositare è valido

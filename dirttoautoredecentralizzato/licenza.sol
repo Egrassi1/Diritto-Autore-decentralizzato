@@ -11,13 +11,11 @@ enum TipoLicenza {RIPRODUZIONE,DISTRIBUZIONE}
     string causale;
     TipoLicenza _tipoLicenza;
     uint256 timestamp;
-    uint256 start;
-    uint256 expire;
-    uint copievendute;
+    uint256 data;
   }
 
 
-contract LicenzaSiae{
+contract AcquistoLicenza{
 
 address public owner;
 
@@ -51,7 +49,6 @@ address public owner;
 
 function mintLicenzaRiproduzione(string memory token_id, string memory causale, uint expire,uint start) payable external 
 {
-
   testo memory t = dt.idOfTesto(token_id);
   uint value = priceRiproduzione(expire,start);
   address autore = dt.onwnerOf(token_id);
@@ -61,7 +58,7 @@ function mintLicenzaRiproduzione(string memory token_id, string memory causale, 
 
   uint timestamp = block.timestamp;
   bytes20 _id = bytes20(keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1))));
-  Licenza memory _licenza = Licenza(_id,t,causale,TipoLicenza.RIPRODUZIONE,timestamp,start,expire,0);
+  Licenza memory _licenza = Licenza(_id,t,causale,TipoLicenza.RIPRODUZIONE,timestamp,expire);
 
   addressToLicenza[msg.sender].push( _licenza) ;
 
@@ -81,7 +78,7 @@ function mintLicenzaDistribuzione(string memory token_id, string memory causale,
  
  uint timestamp = block.timestamp;
  bytes20 _id = bytes20(keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1))));
- Licenza memory _licenza = Licenza(_id,t,causale,TipoLicenza.DISTRIBUZIONE,timestamp,0,0,copie);
+ Licenza memory _licenza = Licenza(_id,t,causale,TipoLicenza.DISTRIBUZIONE,timestamp,copie);
 
  addressToLicenza[msg.sender].push( _licenza) ;
 
@@ -99,7 +96,7 @@ function validLicenzaRiproduzione(address buyer , uint expire,testo memory t) in
     {
     testo memory t1 = addressToLicenza[buyer][i].t;
    
-    if((keccak256(abi.encodePacked(t1.token_id)) ==keccak256(abi.encodePacked(t.token_id))) && addressToLicenza[buyer][i].expire >= expire )
+    if((keccak256(abi.encodePacked(t1.token_id)) ==keccak256(abi.encodePacked(t.token_id))) && addressToLicenza[buyer][i].data >= expire )
     {
       return false;
     }

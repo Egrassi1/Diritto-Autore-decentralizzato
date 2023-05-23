@@ -970,266 +970,266 @@ function buildTestocontract(){
 function buildLicenzacontract()
     {
 			 Licenzacontract = new web3.eth.Contract([
-	{
-		"inputs": [
-			{
-				"internalType": "address payable",
-				"name": "addTesti",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "cambioRip",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "cambioDis",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "tipo",
-				"type": "bool"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "proprietario",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "autore",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "testo",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "id_testo",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "time",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "bytes20",
-				"name": "id",
-				"type": "bytes20"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "dati",
-				"type": "uint256"
-			}
-		],
-		"name": "RilascioLicenza",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "cambio",
-				"type": "uint256"
-			}
-		],
-		"name": "changeCambioDis",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "cambio",
-				"type": "uint256"
-			}
-		],
-		"name": "changeCambioRip",
-		"type": "event"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "fallback"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "token_id",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "causale",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "copie",
-				"type": "uint256"
-			}
-		],
-		"name": "mintLicenzaDistribuzione",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "token_id",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "causale",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "expire",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "start",
-				"type": "uint256"
-			}
-		],
-		"name": "mintLicenzaRiproduzione",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "copie",
-				"type": "uint256"
-			}
-		],
-		"name": "priceDistribuzione",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "prezzo",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "expire",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "start",
-				"type": "uint256"
-			}
-		],
-		"name": "priceRiproduzione",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "prezzo",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "target",
-				"type": "uint256"
-			}
-		],
-		"name": "setcambioDistribuzione",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "target",
-				"type": "uint256"
-			}
-		],
-		"name": "setcambioRiproduzione",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address payable",
-				"name": "_to",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			}
-		],
-		"name": "transfer",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "receive"
-	}
-], Licenzacontractaddress,{from: window.ethereum.selectedAddress})
+				{
+					"inputs": [
+						{
+							"internalType": "address payable",
+							"name": "addTesti",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "cambioRip",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "cambioDis",
+							"type": "uint256"
+						}
+					],
+					"stateMutability": "nonpayable",
+					"type": "constructor"
+				},
+				{
+					"anonymous": false,
+					"inputs": [
+						{
+							"indexed": false,
+							"internalType": "bool",
+							"name": "tipo",
+							"type": "bool"
+						},
+						{
+							"indexed": true,
+							"internalType": "address",
+							"name": "proprietario",
+							"type": "address"
+						},
+						{
+							"indexed": true,
+							"internalType": "address",
+							"name": "autore",
+							"type": "address"
+						},
+						{
+							"indexed": false,
+							"internalType": "string",
+							"name": "testo",
+							"type": "string"
+						},
+						{
+							"indexed": false,
+							"internalType": "string",
+							"name": "id_testo",
+							"type": "string"
+						},
+						{
+							"indexed": false,
+							"internalType": "uint256",
+							"name": "time",
+							"type": "uint256"
+						},
+						{
+							"indexed": false,
+							"internalType": "bytes20",
+							"name": "id",
+							"type": "bytes20"
+						},
+						{
+							"indexed": false,
+							"internalType": "uint256",
+							"name": "dati",
+							"type": "uint256"
+						}
+					],
+					"name": "RilascioLicenza",
+					"type": "event"
+				},
+				{
+					"anonymous": false,
+					"inputs": [
+						{
+							"indexed": false,
+							"internalType": "uint256",
+							"name": "cambio",
+							"type": "uint256"
+						}
+					],
+					"name": "changeCambioDis",
+					"type": "event"
+				},
+				{
+					"anonymous": false,
+					"inputs": [
+						{
+							"indexed": false,
+							"internalType": "uint256",
+							"name": "cambio",
+							"type": "uint256"
+						}
+					],
+					"name": "changeCambioRip",
+					"type": "event"
+				},
+				{
+					"stateMutability": "payable",
+					"type": "fallback"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "string",
+							"name": "token_id",
+							"type": "string"
+						},
+						{
+							"internalType": "string",
+							"name": "causale",
+							"type": "string"
+						},
+						{
+							"internalType": "uint256",
+							"name": "copie",
+							"type": "uint256"
+						}
+					],
+					"name": "mintLicenzaDistribuzione",
+					"outputs": [],
+					"stateMutability": "payable",
+					"type": "function"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "string",
+							"name": "token_id",
+							"type": "string"
+						},
+						{
+							"internalType": "string",
+							"name": "causale",
+							"type": "string"
+						},
+						{
+							"internalType": "uint256",
+							"name": "expire",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "start",
+							"type": "uint256"
+						}
+					],
+					"name": "mintLicenzaRiproduzione",
+					"outputs": [],
+					"stateMutability": "payable",
+					"type": "function"
+				},
+				{
+					"inputs": [],
+					"name": "owner",
+					"outputs": [
+						{
+							"internalType": "address",
+							"name": "",
+							"type": "address"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "uint256",
+							"name": "copie",
+							"type": "uint256"
+						}
+					],
+					"name": "priceDistribuzione",
+					"outputs": [
+						{
+							"internalType": "uint256",
+							"name": "prezzo",
+							"type": "uint256"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "uint256",
+							"name": "expire",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "start",
+							"type": "uint256"
+						}
+					],
+					"name": "priceRiproduzione",
+					"outputs": [
+						{
+							"internalType": "uint256",
+							"name": "prezzo",
+							"type": "uint256"
+						}
+					],
+					"stateMutability": "view",
+					"type": "function"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "uint256",
+							"name": "target",
+							"type": "uint256"
+						}
+					],
+					"name": "setcambioDistribuzione",
+					"outputs": [],
+					"stateMutability": "nonpayable",
+					"type": "function"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "uint256",
+							"name": "target",
+							"type": "uint256"
+						}
+					],
+					"name": "setcambioRiproduzione",
+					"outputs": [],
+					"stateMutability": "nonpayable",
+					"type": "function"
+				},
+				{
+					"inputs": [
+						{
+							"internalType": "address payable",
+							"name": "_to",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "_amount",
+							"type": "uint256"
+						}
+					],
+					"name": "transfer",
+					"outputs": [],
+					"stateMutability": "nonpayable",
+					"type": "function"
+				},
+				{
+					"stateMutability": "payable",
+					"type": "receive"
+				}
+			], Licenzacontractaddress,{from: window.ethereum.selectedAddress})
     }
