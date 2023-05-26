@@ -20,6 +20,7 @@ STATICFILES_DIRS = [
     BASE_DIR /"static/js/",
     BASE_DIR /"static/style/"
 ]
+
 STATIC_ROOT =  os.path.join(BASE_DIR, 'static')
 
 # Quick-start development settings - unsuitable for production

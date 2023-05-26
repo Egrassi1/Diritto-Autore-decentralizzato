@@ -17,7 +17,6 @@ async function login(){
      //recupero nonce casuale da firmare
   xhr = new XMLHttpRequest();
 	xhr.open("GET", url+"/dirittodecent/token/?q="+ Web3.utils.toChecksumAddress(window.ethereum.selectedAddress),false);
-
   xhr.send(null)
 	nonce = xhr.response
 

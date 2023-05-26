@@ -13,7 +13,7 @@ def trust():
         tfile = open(t.file.name, encoding="UTF-8")
         tdata = tfile.read()
         print("inizio comparazione: " + t.id)
-        comparelist = Testo.objects.filter.exclude(trust = False)
+        comparelist = Testo.objects.exclude(id =t.id).exclude(trust= False)
         for c in comparelist:
             cfile =open(c.file.name,encoding="UTF-8")
             cdata= cfile.read()

@@ -19,11 +19,12 @@ from dirittodecent.apps import DirittodecentConfig
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dirittoautore.settings')
 print('Deploy dei contratti')
-set_solc_version('0.8.19')
+
 
 w3 = Web3(Web3.HTTPProvider('HTTP://127.0.0.1:7545'))
 w3.eth.default_account = w3.eth.accounts[0] 
-#print(w3.eth.default_account)
+set_solc_version('0.8.19')
+
 #per il deploy dei contratti si utilizza un portafoglio, in questo caso uso il primo portafoglio di gananche
 DirittodecentConfig.contrattoTesto(w3)
 DirittodecentConfig.ContrattoLicenza(w3)

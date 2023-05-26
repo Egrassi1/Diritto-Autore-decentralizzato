@@ -1,0 +1,55 @@
+http://18.193.74.219:8545
+
+
+/home/ubuntu/django/Diritto-Autore-decentralizzato/dirttoautoredecentralizzato/static/
+
+sudo nano /etc/systemd/system/gunicorn.service
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/django/Diritto-Autore-decentralizzato/dirttoautoredecentralizzato/
+ExecStart=/home/ubuntu/django/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          dirittoautore.wsgi:application
+[Install]
+WantedBy=multi-user.target
+
+
+
+sudo nano /etc/nginx/sites-available/dirittoautore
+
+
+server{
+	listen 80;
+	server_name 13.53.192.147;
+
+	location = /favicon.ico { access_log off; log_not_found off; }
+
+        location /static/ {
+	autoindex on;
+        alias /home/ubuntu/django/Diritto-Autore-decentralizzato/dirttoautoredecentralizzato/static/;
+    }
+	location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
+
+
+
+sudo ln -s /etc/nginx/sites-available/dirittoautore /etc/nginx/sites-enabled
+
+
+sudo nano /etc/nginx/nginx.conf
+
+
+sudo systemctl restart nginx
+sudo systemctl daemon-reload
+sudo systemctl restart gunicorn

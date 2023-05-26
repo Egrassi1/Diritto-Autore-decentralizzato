@@ -29,6 +29,7 @@ class Licenza(models.Model):
      tipo = models.BooleanField()
      autore = models.CharField(max_length = 100)
      titolo = models.CharField(max_length = 100)
+     id_testo = models.CharField(max_length = 100)
      data = models.PositiveIntegerField(default = 0)
      time = models.PositiveIntegerField(default = 0)
 

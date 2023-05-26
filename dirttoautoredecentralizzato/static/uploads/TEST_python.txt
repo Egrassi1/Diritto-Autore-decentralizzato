@@ -1,0 +1,53 @@
+
+def test(request):
+    directory = 'C:/Users/Eugenio/Desktop/dataset'
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        f = open(file_path,encoding='utf-8')
+        djf= File(f)
+        bytes = f.read() 
+        hash = hashlib.md5(bytes.encode()).hexdigest()
+        trans = var.contrattoTesto.functions.mint(filename,hash).build_transaction({
+        'from': var.web3.eth.accounts[0],
+        'to': var.addressTesto,
+        'value': 200000000000000000
+        })
+        var.web3.eth.send_transaction(trans)
+        event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, argument_filters = {"token_id": hash})
+        event_logs = event_filter.get_all_entries()
+        e = event_logs[0]
+        tx_hash = e['transactionHash']
+        receipt = var.web3.eth.get_transaction_receipt(tx_hash)
+        valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
+        valori = valori[0].args 
+        token_id = valori["token_id"]
+        print("transazione eseguita")
+        t = Testo(hash,djf.name,None,valori['titolo'],str(valori['sender']),int(valori['data']))
+            # se il thread non è stato inizializzato , viene costruito e avviato
+        if var.truster == None:
+                var.truster = threading.Thread(target=trust)
+                var.truster.start()
+        filename, ext = os.path.splitext(t.file.name)
+            # se il testo  ha un formato valido , viene inserito nella coda per il controllo
+            # altrimenti viene automaticamente segnalato come falso 
+        if ext == ".txt":
+                t.save() 
+                var.trustitems.append(t)
+                var.semtrust.release() # signal sul semaforo del thread
+        else: 
+                    t.trust = False
+                    t.save()
+    return HttpResponse("tutto ok")
+
+def test2(request):
+    directory = 'C:/Users/Eugenio/Desktop/dataset2'
+    return HttpResponse("tutto ok")
+
+def test3(request):
+    directory = 'C:/Users/Eugenio/Desktop/dataset3'
+    return HttpResponse("tutto ok")
+
+
+def test4(request):
+    directory = 'C:/Users/Eugenio/Desktop/dataset4'
+    return HttpResponse("tutto ok")

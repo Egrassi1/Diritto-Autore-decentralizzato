@@ -31,6 +31,7 @@ def index(request):
       e poi viene ricaricata la pagina perché è necessario rigenerare il token csrf
       Se l'utente non è autenticato viene caricato il template login.html
    """
+   starttime = time.time()
    if (request.user.is_superuser):
        Logout(request)
        return render(request,'login.html')
@@ -44,6 +45,7 @@ def index(request):
       else:
             form = UploadFileForm(request.POST,request.FILES)
             handle_uploaded_file(request.FILES['file'])  
+            print('tempo DEPOSITO:'+str(time.time()-starttime))
             return redirect(url+"/dirittodecent/")
    else:
        return render(request,'login.html')
@@ -59,7 +61,7 @@ def search(request):
   le richieste sono dstinte dal campo t ,  t == T significa che l'utente ricerca un testo , t == L una licenza
   testi e licenze vengono recuperati leggendo gli eventi emessi sulla blockchain
   """
-  #starttime = time.time()
+  starttime = time.time()
   if request.method == 'GET' :
         
         timezone = request.COOKIES.get("timezone")
@@ -98,6 +100,7 @@ def search(request):
                                     "data":data,
                                     "trust": trust}
                     res =  render_to_string('cardTesto.html', context) +res
+            print('tempo trascorso:'+str(time.time()-starttime))
             return HttpResponse(str(pages)+"."+res)
         
         elif tipo == 'L':
@@ -223,46 +226,27 @@ def licenza(request):
         if trans is not None:
             valori = var.contrattoLicenza.events.RilascioLicenza().process_receipt(trans)
             valori = valori[0].args
-            l = Licenza(valori['id'].hex(), valori['proprietario'],valori['tipo'],valori['autore'],valori['testo'],valori['dati'], valori['time'])
+            l = Licenza(valori['id'].hex(), valori['proprietario'],valori['tipo'],valori['autore'],valori['testo'],valori['id_testo'],valori['dati'], valori['time'])
             l.save()
-        return HttpResponse("ok")
+        return HttpResponse("Licenza Registrata")
 
         
-
-
 def download(request):
-    query= request.GET.get('q', None)
-    #bisogna controllare che la licenza per cui è fatta la richeista di download appartenga all'utente autenticato 
-    event_signature_hash = var.web3.keccak(text="RilascioLicenza(bool,address,address,string,string,uint256,bytes20,uint256)").hex()
-    event_filter = var.web3.eth.filter({'fromBlock': 0, 'address': var.addressLicenza, 'topics': [event_signature_hash]})
-    event_logs = event_filter.get_all_entries()
-  
-    for e in event_logs:
-        tx_hash = e['transactionHash']
-        receipt = var.web3.eth.get_transaction_receipt(tx_hash)
-        valori = var.contrattoLicenza.events.RilascioLicenza().process_receipt(receipt)
-        valori = valori[0].args
-        id = valori['id'].hex()
-        if(id == query):
-            prop = valori['proprietario']
-            aut = valori['autore']
-           
-            a = str(request.user)
-            b = str(prop)
-            c = str(aut)
-        
-            if (a == b or a == c):
-
-                testo = Testo.objects.get(id = valori['id_testo'])
-                
+    try:
+        query= request.GET.get('q', None)
+        l = Licenza.objects.get(id=query)    
+        print(l)
+        if(l is not None and(str(l.proprietario)== str(request.user) or str(l.autore) == str(request.user)) ):
+                testo = Testo.objects.get(id = l.id_testo) 
                 file_path = testo.file.name
                 if os.path.exists(file_path):
                     with open(file_path, 'rb') as fh:
                         response = HttpResponse(fh.read(), content_type="application/text-plain")
-                        response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+                        response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
                         return response
-    return HttpResponse("Non hai accesso a questo contenuto")
-
+        return HttpResponse("Non hai accesso a questo contenuto")
+                
+    except: return HttpResponse("Non hai accesso a questo contenuto")
 
 def login(request):
     
@@ -276,7 +260,7 @@ def login(request):
     address =  eth_account.Account.recover_message(message,signature = firma)
 
     address = address
-
+ 
     if (var.auth[address] == msg) : 
       # verifica se per l'utente che ha firmato era stato depositato nel dictionary un nonce corrispondende a quello ricevuto dalla richiesta
       var.auth[address] = None # il token è consumato
@@ -297,10 +281,12 @@ def login(request):
 
 def token(request): #viene gestita la richiesta del token
     query= request.GET.get('q', None)
-    tok = gettoken()
-    query = query
-    var.auth [query] = tok
-    return HttpResponse(tok)
+    if (query is not None):
+        tok = gettoken()
+        query = query
+        var.auth [query] = tok
+        return HttpResponse(tok)
+    else: return HttpResponse("invalid request")
 
 def logout(request):
     if request.user.is_authenticated:
@@ -341,3 +327,166 @@ def unban(request):
             return HttpResponse("success")  
          except:  return HttpResponse("server error")
 
+
+
+
+def test(request):
+    directory = 'C:/Users/Eugenio/Desktop/dataset'
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        f = open(file_path,encoding='utf-8')
+        djf= File(f)
+        bytes = f.read() 
+        hash = hashlib.md5(bytes.encode()).hexdigest()
+        trans = var.contrattoTesto.functions.mint(filename,hash).build_transaction({
+        'from': var.web3.eth.accounts[0],
+        'to': var.addressTesto,
+        'value': 200000000000000000
+        })
+        var.web3.eth.send_transaction(trans)
+        event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, argument_filters = {"token_id": hash})
+        event_logs = event_filter.get_all_entries()
+        e = event_logs[0]
+        tx_hash = e['transactionHash']
+        receipt = var.web3.eth.get_transaction_receipt(tx_hash)
+        valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
+        valori = valori[0].args 
+        token_id = valori["token_id"]
+        print("transazione eseguita")
+        t = Testo(hash,djf.name,None,valori['titolo'],str(valori['sender']),int(valori['data']))
+            # se il thread non è stato inizializzato , viene costruito e avviato
+        if var.truster == None:
+                var.truster = threading.Thread(target=trust)
+                var.truster.start()
+        filename, ext = os.path.splitext(t.file.name)
+            # se il testo  ha un formato valido , viene inserito nella coda per il controllo
+            # altrimenti viene automaticamente segnalato come falso 
+        if ext == ".txt":
+                t.save() 
+                var.trustitems.append(t)
+                var.semtrust.release() # signal sul semaforo del thread
+        else: 
+                    t.trust = False
+                    t.save()
+    return HttpResponse("tutto ok")
+
+def test2(request):
+    directory = 'C:/Users/Eugenio/Desktop/dataset2'
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        f = open(file_path,encoding='utf-8')
+        djf= File(f)
+        bytes = f.read() 
+        hash = hashlib.md5(bytes.encode()).hexdigest()
+        trans = var.contrattoTesto.functions.mint(filename,hash).build_transaction({
+        'from': var.web3.eth.accounts[0],
+        'to': var.addressTesto,
+        'value': 200000000000000000
+        })
+        var.web3.eth.send_transaction(trans)
+        event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, argument_filters = {"token_id": hash})
+        event_logs = event_filter.get_all_entries()
+        e = event_logs[0]
+        tx_hash = e['transactionHash']
+        receipt = var.web3.eth.get_transaction_receipt(tx_hash)
+        valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
+        valori = valori[0].args 
+        token_id = valori["token_id"]
+        print("transazione eseguita")
+        t = Testo(hash,djf.name,None,valori['titolo'],str(valori['sender']),int(valori['data']))
+            # se il thread non è stato inizializzato , viene costruito e avviato
+        if var.truster == None:
+                var.truster = threading.Thread(target=trust)
+                var.truster.start()
+        filename, ext = os.path.splitext(t.file.name)
+            # se il testo  ha un formato valido , viene inserito nella coda per il controllo
+            # altrimenti viene automaticamente segnalato come falso 
+        if ext == ".txt":
+                t.save() 
+                var.trustitems.append(t)
+                var.semtrust.release() # signal sul semaforo del thread
+        else: 
+                    t.trust = False
+                    t.save()
+    return HttpResponse("tutto ok")
+
+def test3(request):
+    directory = 'C:/Users/Eugenio/Desktop/dataset3'
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        f = open(file_path,encoding='utf-8')
+        djf= File(f)
+        bytes = f.read() 
+        hash = hashlib.md5(bytes.encode()).hexdigest()
+        trans = var.contrattoTesto.functions.mint(filename,hash).build_transaction({
+        'from': var.web3.eth.accounts[0],
+        'to': var.addressTesto,
+        'value': 200000000000000000
+        })
+        var.web3.eth.send_transaction(trans)
+        event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, argument_filters = {"token_id": hash})
+        event_logs = event_filter.get_all_entries()
+        e = event_logs[0]
+        tx_hash = e['transactionHash']
+        receipt = var.web3.eth.get_transaction_receipt(tx_hash)
+        valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
+        valori = valori[0].args 
+        token_id = valori["token_id"]
+        print("transazione eseguita")
+        t = Testo(hash,djf.name,None,valori['titolo'],str(valori['sender']),int(valori['data']))
+            # se il thread non è stato inizializzato , viene costruito e avviato
+        if var.truster == None:
+                var.truster = threading.Thread(target=trust)
+                var.truster.start()
+        filename, ext = os.path.splitext(t.file.name)
+            # se il testo  ha un formato valido , viene inserito nella coda per il controllo
+            # altrimenti viene automaticamente segnalato come falso 
+        if ext == ".txt":
+                t.save() 
+                var.trustitems.append(t)
+                var.semtrust.release() # signal sul semaforo del thread
+        else: 
+                    t.trust = False
+                    t.save()
+    return HttpResponse("tutto ok")
+
+
+def test4(request):
+    directory = 'C:/Users/Eugenio/Desktop/dataset4'
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        f = open(file_path,encoding='utf-8')
+        djf= File(f)
+        bytes = f.read() 
+        hash = hashlib.md5(bytes.encode()).hexdigest()
+        trans = var.contrattoTesto.functions.mint(filename,hash).build_transaction({
+        'from': var.web3.eth.accounts[0],
+        'to': var.addressTesto,
+        'value': 200000000000000000
+        })
+        var.web3.eth.send_transaction(trans)
+        event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, argument_filters = {"token_id": hash})
+        event_logs = event_filter.get_all_entries()
+        e = event_logs[0]
+        tx_hash = e['transactionHash']
+        receipt = var.web3.eth.get_transaction_receipt(tx_hash)
+        valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
+        valori = valori[0].args 
+        token_id = valori["token_id"]
+        print("transazione eseguita")
+        t = Testo(hash,djf.name,None,valori['titolo'],str(valori['sender']),int(valori['data']))
+            # se il thread non è stato inizializzato , viene costruito e avviato
+        if var.truster == None:
+                var.truster = threading.Thread(target=trust)
+                var.truster.start()
+        filename, ext = os.path.splitext(t.file.name)
+            # se il testo  ha un formato valido , viene inserito nella coda per il controllo
+            # altrimenti viene automaticamente segnalato come falso 
+        if ext == ".txt":
+                t.save() 
+                var.trustitems.append(t)
+                var.semtrust.release() # signal sul semaforo del thread
+        else: 
+                    t.trust = False
+                    t.save()
+    return HttpResponse("tutto ok")

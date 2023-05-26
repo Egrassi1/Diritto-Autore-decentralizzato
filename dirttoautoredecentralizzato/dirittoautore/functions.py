@@ -19,29 +19,31 @@ def handle_uploaded_file(f, hash = 0):
         #event_signature_hash = var.web3.keccak(text="Deposito(address,string,string,uint256)").hex()
         event_filter = var.contrattoTesto.events.Deposito.create_filter(fromBlock = 0, argument_filters = {"token_id": hash})
         event_logs = event_filter.get_all_entries()
-        e = event_logs[0]
-        tx_hash = e['transactionHash']
-        receipt = var.web3.eth.get_transaction_receipt(tx_hash)
-        valori = var.contrattoTesto.events.Deposito().process_receipt(receipt) 
-        valori = valori[0].args 
-        token_id = valori["token_id"]
+        try:
+            e = event_logs[0]
+            print(event_logs[0]['args'])
+            tx_hash = e['transactionHash']
+            valori = event_logs[0]['args'] 
+            #si da' per assunto che esista un solo evento in quanto l'id è univoco
+            token_id = valori["token_id"]
 
-        if(token_id == hash):         
-            t = Testo(hash,f,None,valori['titolo'],str(valori['sender']),int(valori['data']))
-            # se il thread non è stato inizializzato , viene costruito e avviato
-            if var.truster == None:
-                var.truster = threading.Thread(target=trust)
-                var.truster.start()
-            filename, ext = os.path.splitext(t.file.name)
-            # se il testo  ha un formato valido , viene inserito nella coda per il controllo
-            # altrimenti viene automaticamente segnalato come falso 
-            if ext == ".txt":
-                t.save() 
-                var.trustitems.append(t)
-                var.semtrust.release() # signal sul semaforo del thread
-            else: 
-                    t.trust = False
-                    t.save()
+            if(token_id == hash):         
+                t = Testo(hash,f,None,valori['titolo'],str(valori['sender']),int(valori['data']))
+                # se il thread non è stato inizializzato , viene costruito e avviato
+                if var.truster == None:
+                    var.truster = threading.Thread(target=trust)
+                    var.truster.start()
+                filename, ext = os.path.splitext(t.file.name)
+                # se il testo  ha un formato valido , viene inserito nella coda per il controllo
+                # altrimenti viene automaticamente segnalato come falso 
+                if ext == ".txt":
+                    t.save() 
+                    var.trustitems.append(t)
+                    var.semtrust.release() # signal sul semaforo del thread
+                else: 
+                        t.trust = False
+                        t.save()
+        except: print("transazione non riconosciuta")
 
 # questa funzione controlla la corrispondenza tra il testo di una query effettuata dall'utente e i dati recuperati dalla blockchain
 def match(query,data):

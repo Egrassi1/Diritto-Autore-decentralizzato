@@ -98,12 +98,11 @@ function mode(){
 	   Licenzacontractaddress = ad.split(";")[1]
 
 	   await window.ethereum.request({ method: "eth_requestAccounts" })
-	  
 	  .then((accounts) => {
 		
 		  const account = accounts[0]
 		  window.ethereum.accounts = accounts
-			 document.getElementById("portafoglio").innerHTML="portafoglio: "+account
+			document.getElementById("portafoglio").innerHTML="portafoglio: "+account
 
 
 
@@ -226,33 +225,27 @@ function openNav() {
 
   async function deposita(){
 		
-        const file = document.getElementById("filefield").files[0];
+       	 const file = document.getElementById("filefield").files[0];
         //console.log(file);
-        var id ;
-		erdep.innerHTML =""
-        const reader = new FileReader();
+          var id ;
+		  erdep.innerHTML =""
+       	  const reader = new FileReader();
 		 // viene calcolato hash md del file selezionato per definire l'id corretto
           reader.onload = (event) => {
           const binaryString = event.target.result;
           const md5 = CryptoJS.MD5(CryptoJS.enc.Latin1.parse(binaryString)).toString(CryptoJS.enc.Hex);
           id = md5 
-          //console.log(id)
           var titolo = document.getElementById("ftitolo").value
 
-
-
-			
 			DepositoContract.methods.mint(titolo , id).estimateGas({"value": web3.utils.toWei(prezzoDep,"wei")},
 			function(error, estimatedGas) {
 				if(error){
-					
 					error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
 					error= JSON.parse(error)
-					//window.alert(error.data.reason)
 					erdep.innerHTML = error.data.reason
-					
 				}else{
 			const trans = DepositoContract.methods.mint(titolo , id).send({"value": web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt){
+
 			//una volta effettuata la transazione il file viene caricato sul backend
 			$("#post-form").submit()	
 
@@ -267,7 +260,7 @@ function openNav() {
 	// un successivo controllo viene effettuato server-side , quallora il testo sia comunque del formato sbagliato
 	// quest'ultimo viene segnalato come non autentico dal sistema di trust
 	upload = file.name.substring(file.name.lastIndexOf("."))
-	if(upload == ".txt" || upload != ".txt")
+	if(upload == ".txt")
 	{
 	 await reader.readAsBinaryString(file);   
 	}else{window.alert("Formato del file non accettato , usare solo .txt")}
