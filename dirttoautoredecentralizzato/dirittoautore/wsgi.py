@@ -21,7 +21,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dirittoautore.settings')
 print('Deploy dei contratti')
 
 
-w3 = Web3(Web3.HTTPProvider('HTTP://127.0.0.1:7545'))
+w3 = Web3(Web3.HTTPProvider('http://3.68.75.58:8545'))
 w3.eth.default_account = w3.eth.accounts[0] 
 set_solc_version('0.8.19')
 

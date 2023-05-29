@@ -8,7 +8,10 @@ import dirittoautore.var as var
 import threading
 from dirittodecent.trust import trust
 
-def handle_uploaded_file(f, hash = 0):  
+
+
+
+def handle_uploaded_file(f):  
     # viene calcolato analogamente al front-end l'hash del file appena caricato
 
         bytes = f.read() 

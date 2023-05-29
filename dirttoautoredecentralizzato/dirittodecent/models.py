@@ -16,11 +16,11 @@ class Bannedusers(models.Model):
         ]
 
 class Testo(models.Model):
-    id = models.CharField(max_length = 100, primary_key= True)
+    id = models.CharField(max_length = 200, primary_key= True)
     file = models.FileField(upload_to = STATIC_URL +'uploads/')
     trust = models.BooleanField(blank=True, null=True)
-    titolo = models.CharField(max_length=100)
-    sender = models.CharField(max_length=100)
+    titolo = models.CharField(max_length=200)
+    sender = models.CharField(max_length=200)
     data = models.PositiveIntegerField(default = 0)
 
 class Licenza(models.Model):

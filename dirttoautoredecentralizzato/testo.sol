@@ -130,7 +130,7 @@ function validDeposito(string calldata token_id) public view returns(bool validi
 
     for(uint i = 0 ; i < banned[author].length ; i++ ){
 
-    if (banned[target][i]== target)
+    if (banned[author][i]== target)
     {
       return false;
     }
