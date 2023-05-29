@@ -1,4 +1,4 @@
-const url = "https://16.16.124.198/"
+const url = "https://16.16.124.198"
 window.addEventListener("load",onload)
 document.getElementById("login").addEventListener("click",login)
 

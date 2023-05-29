@@ -25,7 +25,7 @@ from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 
-url = "https://16.16.124.198/"
+url = "https://16.16.124.198"
 
 def index(request):
    """ Se l'utente è autenticato:
@@ -334,6 +334,12 @@ def unban(request):
 
 
 def test(request):
+    tester = threading.Thread(target=testerm)
+    tester.start()
+    return HttpResponse("test iniziato ")
+
+
+def testerm():
     directory = BASE_DIR.joinpath('dataset/')
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
@@ -394,4 +400,3 @@ def test(request):
             valori = valori[0].args
             l = Licenza(valori['id'].hex(), valori['proprietario'],valori['tipo'],valori['autore'],valori['testo'],valori['id_testo'],valori['dati'], valori['time'])
             l.save()
-    return HttpResponse("tutto ok")

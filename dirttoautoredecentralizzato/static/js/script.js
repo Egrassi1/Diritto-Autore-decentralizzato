@@ -1,5 +1,5 @@
 
-	const url = "https://16.16.124.198/"
+	const url = "https://16.16.124.198"
 	open_menu =false;
 	const erdep = document.getElementById("erdep")
 	const erban = document.getElementById("erban")
