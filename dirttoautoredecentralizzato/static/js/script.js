@@ -1,5 +1,5 @@
 
-	const url = "https://16.16.124.198"
+	const url = "http://127.0.0.1:8000"
 	open_menu =false;
 	const erdep = document.getElementById("erdep")
 	const erban = document.getElementById("erban")
@@ -11,9 +11,9 @@
 	var Licenzacontract;
 	var Licenzacontractaddress ;
 
-	var cambioRip;
-	var cambioDis;
-	var prezzoDep;
+	var cambioRip = 1000000;
+	var cambioDis = 1000000;
+	var prezzoDep = 200000000000000000;
 	var web3;
 
 	var formbtnD;
@@ -235,26 +235,32 @@ function openNav() {
           const binaryString = event.target.result;
           const md5 = CryptoJS.MD5(CryptoJS.enc.Latin1.parse(binaryString)).toString(CryptoJS.enc.Hex);
           id = md5 
+		  console.log(id)
           var titolo = document.getElementById("ftitolo").value
 
+
+		  /** 
 			DepositoContract.methods.mint(titolo , id).estimateGas({"value": web3.utils.toWei(prezzoDep,"wei")},
 			function(error, estimatedGas) {
 				if(error){
 					error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
 					error= JSON.parse(error)
 					erdep.innerHTML = error.data.reason
+					console.log("ciaooo2")
 				}else{
-			const trans = DepositoContract.methods.mint(titolo , id).send({"value": web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt){
+					console.log("ciaooo")
+					*/
 
+			const trans = DepositoContract.methods.mint(titolo , id).send({"value": web3.utils.toWei(prezzoDep,"wei")}).on('receipt', function(receipt,error){
+				
 			//una volta effettuata la transazione il file viene caricato sul backend
 			$("#post-form").submit()	
-
+			
           })
-		  
-			}
-        })
-	
-	}
+
+		}
+       // })
+	//}
 	
 	// la transazione viene trasmessa solo se il file inserito ha il formato di '.txt'
 	// un successivo controllo viene effettuato server-side , quallora il testo sia comunque del formato sbagliato
@@ -280,8 +286,9 @@ async function mintLicenzaRiproduzione(event)
           start = Math.floor(today.getTime() / 1000)
           var scadenza =Math.floor( new Date(expire.value).getTime()/1000)
           var value = (scadenza - start) * cambioRip
-          value = web3.utils.BN(value)
+          //value = web3.utils.BN(value)
 
+		   /**
 		  Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).estimateGas({"value": web3.utils.toWei(value,"wei")},
 			function(error, estimatedGas) {
 				if(error){
@@ -292,7 +299,9 @@ async function mintLicenzaRiproduzione(event)
 					//window.alert(error.data.reason)
 					
 				}else{
-          Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).send({"value":web3.utils.toWei(value, "wei")}).on('receipt', function(receipt){
+					*/
+          Licenzacontract.methods.mintLicenzaRiproduzione(id,causale,scadenza,start).send({"value":web3.utils.toWei(value.toString(), "wei")})
+		  .on('receipt', function(receipt){
 			//una volta effettuata la transazione il file viene caricato sul backend
 			xhr = new XMLHttpRequest();
   			xhr.open("POST", url+"/dirittodecent/licenza/");
@@ -309,8 +318,8 @@ let data = {
 };
 xhr.send(JSON.stringify(data));
 
-          })
-				}
+         // })
+				//}
 			 })
       }
   
@@ -323,7 +332,7 @@ async function mintLicenzaDistribuzione(event){
 		  err.innerHTML = ""
           value = (cambioDis*num) 
 
-
+/** 
 		  Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).estimateGas({"value": web3.utils.toWei(value.toString(),"wei")},
 			function(error, estimatedGas) {
 				if(error){
@@ -332,8 +341,9 @@ async function mintLicenzaDistribuzione(event){
 					error= JSON.parse(error)
 					//window.alert(error.data.reason)
 					err.innerHTML = error.data.reason
-				}else{
-          Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).send({"value" : web3.utils.toWei(value.toString(), "wei") }).on('receipt', function(receipt){
+				}else{*/
+          Licenzacontract.methods.mintLicenzaDistribuzione(id,causale,num).send({"value" : web3.utils.toWei(value.toString(), "wei") })
+		  .on('receipt', function(receipt){
 			//una volta effettuata la transazione il file viene caricato sul backend
 			xhr = new XMLHttpRequest();
   			xhr.open("POST", url+"/dirittodecent/licenza/");
@@ -344,13 +354,14 @@ async function mintLicenzaDistribuzione(event){
  			 if (xhr.readyState === 4) {
    			 window.location.replace(url+"/dirittodecent");
  			 }};
-let data = { 
+			let data = { 
 "tx": receipt.transactionHash
 };
-xhr.send(JSON.stringify(data));
 
-          })
-				}})
+xhr.send(JSON.stringify(data));
+         // })
+				//}
+			})
   
       }
 
@@ -360,7 +371,8 @@ async function ban(){
 	target= document.getElementById("banuser").value
 	erban.innerHTML = ""
 
-	 DepositoContract.methods.ban(target).estimateGas(function(error, estimatedGas) {
+	/** 
+		 DepositoContract.methods.ban(target).estimateGas(function(error, estimatedGas) {
 		if(error){
 			
 			error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
@@ -369,7 +381,7 @@ async function ban(){
 					erban.innerHTML = error.data.reason
 		}
 		else{
-			
+			*/
 			    DepositoContract.methods.ban(target).send().on('receipt', function(receipt){
 	    
 				xhr = new XMLHttpRequest();
@@ -394,7 +406,7 @@ async function ban(){
 			  	
 
 
-		}})
+		//}})
 
 	
 
@@ -406,8 +418,7 @@ async function ban(){
 async function unban(event){
 	id = event.target.id 
 	target= document.getElementById("t"+id).innerText
-
-
+/** 
 	DepositoContract.methods.unban(target).estimateGas(function(error, estimatedGas) {
 		if(error){
 			error =error.message.substring(error.message.indexOf("{") ,error.message.lastIndexOf("}")+1)
@@ -415,8 +426,8 @@ async function unban(event){
 					window.alert(error.data.reason)
 		}
 		else{
-			
-			    DepositoContract.methods.unban(target).send().on('receipt', function(receipt){
+			*/
+		DepositoContract.methods.unban(target).send().on('receipt', function(receipt){
 		
 		xhr = new XMLHttpRequest();
 		xhr.open("POST", url+"/dirittodecent/unban/"); 
@@ -447,9 +458,9 @@ async function unban(event){
 	}
 
 
-})
+//})
 
-}
+//}
 
 
 function listusers(){

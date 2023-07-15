@@ -20,6 +20,7 @@ def trust():
             rateo=  SequenceMatcher(None, tdata,cdata).ratio() * 100
             if (rateo >25):
                 trust = False
+            cfile.close()
         t.trust = trust
         t.save()
         print("fine comparazione: "+ t.id + " il trust è "+ str(trust))

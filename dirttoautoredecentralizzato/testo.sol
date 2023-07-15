@@ -32,8 +32,6 @@ contract DepositoTesti{
 {
   owner = msg.sender;
  setprezzoDeposito(prezzo);
- 
- emit cambioprezzoDeposito(prezzo);
 }
 
 modifier ownerOnly(){

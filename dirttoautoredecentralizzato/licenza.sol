@@ -57,7 +57,7 @@ function mintLicenzaRiproduzione(string memory token_id, string memory causale, 
   require(dt.validUser(msg.sender, autore ), "l'utente non e' abilitato dall'autore ad acquistare la licenza");
 
   uint timestamp = block.timestamp;
-  bytes20 _id = bytes20(keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1))));
+  bytes20 _id = bytes20(keccak256(abi.encodePacked(msg.sender, blockhash(block.number))));
   Licenza memory _licenza = Licenza(_id,t,causale,TipoLicenza.RIPRODUZIONE,timestamp,expire);
 
   addressToLicenza[msg.sender].push( _licenza) ;
